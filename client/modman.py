@@ -9,6 +9,20 @@ import re
 
 debug = False
 # Fetch Latest Model Params (StateDict)
+
+def get_model_lock(url: str, Id: str) -> bool:
+    # Send GET request
+    r = requests.get(url=url + 'clear/'+Id)
+    print("status", r.status_code) 
+    if r.status_code != 200:
+        print("Server Error: Could not fetch Lock Status.\nTrying to set global params...")
+        return False   # implies cant read the data
+    # Extract data in json format
+    data = r.json()
+    
+    print("Lock data:->", data)
+
+
 def fetch_params(url: str, Id: str):
     body = {'data':{
         'id' : Id,
@@ -16,18 +30,25 @@ def fetch_params(url: str, Id: str):
     }
     }
     # Send GET request
-    r = requests.get(url=url+Id, json=body)
+    r = requests.get(url=url+'get/'+Id, json=body)
+    print("status", r.status_code) 
+
+    if r.status_code == 404:
+        print("Server Error: Could not fetch model.\nTrying to set global params...")
+        print("ReplyFetch", r)
+        return {}, None, None, False
+
     print("Reply", r)
     # Extract data in json format
     data = r.json()
 
     # Check for Iteration Number (-1 Means, No model params is present on Server)
-    if data['iteration'] == -1:
-        return {}, data['npush'], data['logs_id'], False
-    else:
-        if debug:
-            print("Global Iteration", data['iteration'])
-        return data['params'], data['npush'], data['logs_id'], True
+    # if data['Iteration'] == -1:
+    #     return {}, data['NPush'], data['ModelUpdateCount'], False
+    # else:
+    #     if debug:
+    print("Global Iteration", data['Iteration'])
+    return json.loads(data['ModelParams']), data['NPush'], data['ModelID'], True
 # remove send gradient method as we are not dealing with gradients in FL
 
 # Send Trained Model Params (StateDict)
@@ -35,13 +56,17 @@ def fetch_params(url: str, Id: str):
 # Get Model Lock
 def get_model_lock(url: str, Id: str) -> bool:
     # Send GET request
-    r = requests.get(url=url + 'getLock'+Id)
-
+    r = requests.get(url=url + 'getLock/'+Id)
+    print("status", r.status_code) 
+    if r.status_code != 200:
+        print("Server Error: Could not fetch Lock Status.\nTrying to set global params...")
+        return False   # implies cant read the data
     # Extract data in json format
     data = r.json()
-    print("Lock data:->", data['lock'])
+    
+    print("Lock data:->", data)
 
-    return data['lock'] 
+    return data['LockStatus']
 
 def send_local_update(url: str, params: dict, epochs: int, Id: str):
     body =  {'data':{
@@ -50,6 +75,7 @@ def send_local_update(url: str, params: dict, epochs: int, Id: str):
         'pid': getpid(),
         'epochs': epochs
     }
+    
     }
 
     # Send POST request
@@ -57,7 +83,7 @@ def send_local_update(url: str, params: dict, epochs: int, Id: str):
 
     # Extract data in json format
     data = r.json()
-    return (["iteration ", data['iteration'], "No of clients perticipant in the updation", data['n_clients'], data['Message']])
+    return data
 
 
 def send_model_params(url: str, params: dict, lr: float, Id: str):
@@ -75,7 +101,8 @@ def send_model_params(url: str, params: dict, lr: float, Id: str):
     # Extract data in json format
     data = r.json()
 
-    return data
+    print("data-->", data['Iteration'])
+    return json.loads(data['ModelParams']), data['NPush'], data['ModelID'], data['Iteration']
 # Convert State Dict List to Tensor
 def convert_list_to_tensor(params: dict) -> dict:
     params_ = {}

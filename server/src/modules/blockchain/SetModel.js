@@ -20,15 +20,15 @@ module.exports = (params) => {
         // client_params_key = ShardDB.SetClientParamsPair([client_key , client_params_value]);
         collectedparams = {
             ModelID: params[0],            
-            Iteration = -1,
+            Iteration: -1,
             NClients:1,
             AllParams: [],
             AllClients: [],
             Lock: false,
 
         };
-
-        fs.writeFileSync(`./models/${collectedparams.ModelID}.json`, JSON.stringify(collectedparams));
+        // collectedparams.AllClients.push("hello")
+        fs.writeFileSync(`./models/${collectedparams.ModelID}U.json`, JSON.stringify(collectedparams));
         console.log("Created File for collected params", collectedparams.ModelID);
         return model;
     } catch (error) {

@@ -42,7 +42,8 @@ ENV_NAME = 'CartPole-v0'
 
 ip_address = "172.16.26.15"  # server macine ip address
 # API endpoint
-URL = "http://"+ip_address+":5500/api/model/"
+# URL = "http://"+ip_address+":5500/api/model/"
+URL = "http://localhost:5500/api/model/"
 
 # ..
 
@@ -150,22 +151,21 @@ log_data=[]
 ##############################################
 # Fetch Initial Model Params (If Available)
 ##############################################
+
+# reply = modman.send_model_params(
+#         URL, modman.convert_tensor_to_list(pie.Q.state_dict()), PIE_PARAMS.LR, ALIAS)
+# print("Response:",reply)
+
 while modman.get_model_lock(URL, ALIAS):  # wait if model updation is going on
-                    print("Waiting for Model Lock Release.")
-
-global_params, n_push, log_id, is_available = modman.fetch_params(URL+'get', ALIAS)
-
+    print("Waiting for Model Lock Release.")
+print("before fetch params")
+global_params, n_push, log_id, is_available = modman.fetch_params(URL, ALIAS)
+# print("global params", global_params)
 n_steps=n_push
+print("After fetch Params")
 
-log_path = './client/logs/'
-log_file = log_id+ 'client_logs.csv'
-log_testing = log_id+ 'testing_logs.csv'
 
-path1 = modman.increment_path(path=log_path+log_file,exist_ok=False,mkdir=True)
-path2 = modman.increment_path(path=log_path+log_testing,exist_ok=False,mkdir=True)
 
-modman.csv_writer(path=path1,data=[[f'Log Data for Client IPAddres: {IPAddr} Pid: {getpid()}']])
-modman.csv_writer(path=path2,data=[[f'Log Data for Client IPAddres: {IPAddr} Pid: {getpid()}']])
 if is_available:
     P("Model exist")
     P("Loading Q params .....")
@@ -181,13 +181,22 @@ if is_available:
     pie.T.eval()
 else:
     P("Setting model for server")
+    global_params, n_push, log_id, Iteration = modman.send_model_params(
+        URL, modman.convert_tensor_to_list(pie.Q.state_dict()), PIE_PARAMS.LR, ALIAS)
     P("Number Push: ", n_push)
     log_data.append([f'Log Data for Client IPAddres: {IPAddr} Pid: {getpid()}'])
     log_data.append(["Setting model for server"])
     log_data.append(["Number Push: ", n_push])
-    reply = modman.send_model_params(
-        URL, modman.convert_tensor_to_list(pie.Q.state_dict()), PIE_PARAMS.LR, ALIAS)
-    print(reply)
+    # print(reply)
+
+log_path = './client/logs/'
+log_file = log_id+ 'client_logs.csv'
+log_testing = log_id+ 'testing_logs.csv'
+
+path1 = modman.increment_path(path=log_path+log_file,exist_ok=False,mkdir=True)
+path2 = modman.increment_path(path=log_path+log_testing,exist_ok=False,mkdir=True)
+modman.csv_writer(path=path1,data=[[f'Log Data for Client IPAddres: {IPAddr} Pid: {getpid()}']])
+modman.csv_writer(path=path2,data=[[f'Log Data for Client IPAddres: {IPAddr} Pid: {getpid()}']])
 
 ##############################################
 # Training
@@ -236,16 +245,17 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
                 reply = modman.send_local_update(URL + 'collect',
                  modman.convert_tensor_to_list(pie.Q.state_dict()),
                  epoch, ALIAS)
-                print(reply)
+                print(reply, "\n Local update sent")
                 log_data.append(reply)
                 
                 # Wait for Model Lock to get Released
-                while modman.get_model_lock(URL):
+                while modman.get_model_lock(URL, ALIAS):
                     print("Waiting for Model Lock Release.")
 
                 # Get Updated Model Params from Server
-                global_params, n_push,_, is_available = modman.fetch_params(URL + 'get', ALIAS)
+                global_params, n_push,_, is_available = modman.fetch_params(URL, ALIAS)
                 n_steps=n_push
+                # print("Params->", global_params)
                 pie.Q.load_state_dict(modman.convert_list_to_tensor(global_params))
                 pie.Q.eval()
 

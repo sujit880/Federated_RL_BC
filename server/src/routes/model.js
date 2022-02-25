@@ -3,13 +3,29 @@ const ModelContract = require("../modules/model");
 
 const router = new express.Router();
 
-router.get("/api/model/getLock/:id", async (req, res) => {
+router.post("/api/model/clear/:id", async (req, res) => {
     try {
-        let data = await ModelContract.GetLock([req.params.id]);
+        console.log("got clear request");
+        let data = await ModelContract.ClearData([req.params.id]);
         if (data == null) throw "Error In Parent Methods.";
 
         res.status(200).send({ LockStatus: data });
     } catch (error) {
+        console.error(error);
+        res.status(404).send({ message: "Model Clear Status Error!" });
+    }
+});
+
+router.get("/api/model/getLock/:id", async (req, res) => {
+    try {
+        console.log("got getlock request from client");
+        let data = await ModelContract.GetLock([req.params.id]);
+        console.log("lock data->", data)
+        if (data == null) throw "Error In Parent Methods.";
+
+        res.status(200).send({ LockStatus: data });
+    } catch (error) {
+        console.log("exception occured in getlock");
         console.error(error);
         res.status(404).send({ message: "Model Lock Status Error!" });
     }
@@ -30,11 +46,14 @@ router.get("/api/model/getULock/:id", async (req, res) => {
 
 router.get("/api/model/get/:id", async (req, res) => {
     try {
+        
+        console.log("got get request from client",req.params.id);
         let data = await ModelContract.GetModel([req.params.id, req.body.data.pid, req.ip]);
         if (!data) throw "Error In Parent Methods.";
 
         res.status(200).send(data);
     } catch (error) {
+        console.log("exception occured in fetch param");
         console.error(error);
         res.status(404).send({ message: "Model NOT found!" });
     } });
@@ -55,7 +74,7 @@ router.post("/api/model/set/", async (req, res) => {
         let reply = await ModelContract.SetModel([req.body.data.id, req.body.data.model, req.body.data.learning_rate, req.body.data.pid, req.ip]);
         if (!reply) throw "Error In Parent Methods.";
 
-        res.status(200).send({ reply, message: "Model Successfully Set." });
+        res.status(200).send(reply);
     } catch (error) {
         console.error(error);
         res.status(500).send({ message: "Model NOT Set!" });

@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-modele.exports = (key) => {
+module.exports = (key) => {
     try {
         let value = fs.readFileSync(`./models/shards/${key}.shard`, "utf8");
         console.log("Get Model Shard", key);
