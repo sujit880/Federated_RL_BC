@@ -20,6 +20,11 @@ module.exports = (params) => {
             collected_params.NClients = collected_params.NClients+1;
             collected_params.AllClients.push(key);
         }
+        if ( collected_params.Scores[key] === undefined) {
+            collected_params.Scores[key] = 200;
+            console.log("New score is given to client key", key);
+        }
+        console.log("ALL clients scores: ", Object.keys(collected_params.Scores), " -> ", Object.values(collected_params.Scores));
         fs.writeFileSync(`./models/${collected_params.ModelID}U.json`, JSON.stringify(collected_params));
         console.log("Updated collected params", collected_params.ModelID);
         return model;

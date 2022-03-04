@@ -17,9 +17,9 @@ module.exports = (params) => {
             collected_params.Iteration = params[3];
         console.log("storing client params of client", collectparams.ClientKey);
         fs.writeFileSync(`./all_params/${collectparams.ClientKey}.json`, JSON.stringify(collectparams));
-        collected_params.AllParams.push(collectparams.ClientKey);
+        collected_params.AllParams[params[1]]= params[1];
         console.log("Client Params collected", collectparams.ClientKey);
-
+        console.log("collected all local params: ", Object.values(collected_params.AllParams));
         fs.writeFileSync(`./models/${collected_params.ModelID}U.json`, JSON.stringify(collected_params));
         console.log("Created File for collected params", collected_params.ModelID);
 

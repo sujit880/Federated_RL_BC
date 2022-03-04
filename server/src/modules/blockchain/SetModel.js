@@ -22,9 +22,10 @@ module.exports = (params) => {
             ModelID: params[0],            
             Iteration: -1,
             NClients:1,
-            AllParams: [],
+            AllParams: {},
             AllClients: [],
             Lock: false,
+            Scores: {},
 
         };
         // collectedparams.AllClients.push("hello")

@@ -18,7 +18,8 @@ router.post("/api/model/clear/:id", async (req, res) => {
 
 router.get("/api/model/getLock/:id", async (req, res) => {
     try {
-        console.log("got getlock request from client");
+        // console.log("Socket: ", req.socket.remoteAddress);
+        console.log("got getlock request from client ip: ", req.ip);
         let data = await ModelContract.GetLock([req.params.id]);
         console.log("lock data->", data)
         if (data == null) throw "Error In Parent Methods.";
@@ -47,7 +48,7 @@ router.get("/api/model/getULock/:id", async (req, res) => {
 router.get("/api/model/get/:id", async (req, res) => {
     try {
         
-        console.log("got get request from client",req.params.id);
+        console.log("got get request from client ip: ",req.ip, "pid: ", req.body.data.pid);
         let data = await ModelContract.GetModel([req.params.id, req.body.data.pid, req.ip]);
         if (!data) throw "Error In Parent Methods.";
 
