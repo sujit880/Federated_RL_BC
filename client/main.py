@@ -188,7 +188,7 @@ else:
     log_data.append(["Setting model for server"])
     log_data.append(["Number Push: ", n_push])
     # print(reply)
-
+n_steps=n_push
 log_path = './client/logs/'
 log_file = log_id+ 'client_logs.csv'
 log_testing = log_id+ 'testing_logs.csv'

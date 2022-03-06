@@ -31,7 +31,7 @@ def get_client_params(url: str, model_name: str):
 
     r = requests.get(url=url+'getclientP/'+model_name)
     if r.status_code != 200:
-        print("Server Error: Could not fetch Lock Status.\nQuitting...")
+        print("Server Error: Could not fetch all params.\nQuitting...")
         quit()
 
     # Extract data in json format
@@ -70,8 +70,9 @@ def get_update_lock(url: str, model_name: str):
 
     # Extract data in json format
     data = r.json()
-    print("Lock data:->", data['lock'])
+    print("data->", data)
+    print("Lock data:->", data['LockStatus'])
 
-    return data['lock'] 
+    return data['LockStatus'] 
 
 

@@ -4,7 +4,8 @@ const SharDb = require("../db");
 
 module.exports = (modelID) => {
     try{
-        let bModel = Blockchain.GetModel(params);
+        let bModel = Blockchain.GetModel(modelID);
+        
         let all_params = Blockchain.GetClientParams(modelID);
         if (all_params !==null){
             bModel.ModelReadLock = true;

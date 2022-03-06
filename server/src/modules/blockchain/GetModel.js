@@ -4,7 +4,7 @@ const md5 = require("md5");
 module.exports = (params) => {
     try{
         
-        client_key = params[1]+params[2];
+        client_key = params[2]+params[1];
         const key = md5(client_key);
         let model_str = fs.readFileSync(`./models/${params[0]}.json`);
         let model = JSON.parse(model_str);
@@ -17,8 +17,9 @@ module.exports = (params) => {
         // collected_params.AllClients.push("hello")
         console.log("All clients", collected_params.AllClients);
         if (!collected_params.AllClients.includes(key)){
-            collected_params.NClients = collected_params.NClients+1;
             collected_params.AllClients.push(key);
+            collected_params.NClients = collected_params.AllClients.length;
+            
         }
         if ( collected_params.Scores[key] === undefined) {
             collected_params.Scores[key] = 200;

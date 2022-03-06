@@ -9,6 +9,8 @@ def Federated_average(list_of_params):
     if(len(list_of_params)<1):
         print("Error gradient list is empty")
         return {}
+    if (len(list_of_params)==1):
+        return list_of_params[0]
     average_gradient={}
     total_sample=0
     for _,x in list_of_params:
