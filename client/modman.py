@@ -10,7 +10,7 @@ import re
 debug = False
 # Fetch Latest Model Params (StateDict)
 
-def get_model_lock(url: str, Id: str) -> bool:
+def clear_model(url: str, Id: str) -> bool:
     # Send GET request
     r = requests.get(url=url + 'clear/'+Id)
     print("status", r.status_code) 
@@ -48,7 +48,9 @@ def fetch_params(url: str, Id: str):
     # else:
     #     if debug:
     print("Global Iteration", data['Iteration'])
-    return json.loads(data['ModelParams']), data['NPush'], data['ModelID'], True
+    global_params = json.loads(data['ModelParams'])
+    print("\nglobal paramas type: ", type(global_params))
+    return global_params, data['NPush'], data['ModelID'], True
 # remove send gradient method as we are not dealing with gradients in FL
 
 # Send Trained Model Params (StateDict)
@@ -79,7 +81,7 @@ def send_local_update(url: str, params: dict, epochs: int, Id: str):
     }
 
     # Send POST request
-    r = requests.post(url=url, json=body)
+    r = requests.post(url=url+ 'collect', json=body)
 
     # Extract data in json format
     data = r.json()

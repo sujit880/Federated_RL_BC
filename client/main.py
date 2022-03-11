@@ -18,7 +18,7 @@ from queue import Queue
 import gym
 
 from copy import deepcopy
-
+from time import sleep
 import socket   
 
 hostname = socket.gethostname()   
@@ -43,7 +43,9 @@ ENV_NAME = 'CartPole-v0'
 ip_address = "172.16.26.15"  # server macine ip address
 # API endpoint
 # URL = "http://"+ip_address+":5500/api/model/"
-URL = "http://localhost:5500/api/model/"
+# URL = "http://localhost:5500/api/model/"
+
+URL = "http://localhost:3000/api/model/"
 
 # ..
 
@@ -62,8 +64,8 @@ EXP_PARAMS.DECAY_ADD = 0
 
 
 PIE_PARAMS = INFRA()
-PIE_PARAMS.LAYERS = [128, 128, 128]
-PIE_PARAMS.OPTIM = torch.optim.RMSprop # 1. RMSprop, 2. Adam, 3. SGD
+PIE_PARAMS.LAYERS = [28, 28, 28]
+PIE_PARAMS.OPTIM = torch.optim.Adam # 1. RMSprop, 2. Adam, 3. SGD
 PIE_PARAMS.LOSS = torch.nn.MSELoss
 PIE_PARAMS.LR = 0.001
 PIE_PARAMS.DISCOUNT = 0.999999
@@ -157,7 +159,8 @@ log_data=[]
 # print("Response:",reply)
 
 while modman.get_model_lock(URL, ALIAS):  # wait if model updation is going on
-    print("Waiting for Model Lock Release.")
+    print("Waiting for Model Lock Release1.")
+    sleep(0.02)
 print("before fetch params")
 global_params, n_push, log_id, is_available = modman.fetch_params(URL, ALIAS)
 # print("global params", global_params)
@@ -183,11 +186,15 @@ else:
     P("Setting model for server")
     global_params, n_push, log_id, Iteration = modman.send_model_params(
         URL, modman.convert_tensor_to_list(pie.Q.state_dict()), PIE_PARAMS.LR, ALIAS)
+    global_params, n_push, log_id, is_available = modman.fetch_params(URL, ALIAS)
     P("Number Push: ", n_push)
     log_data.append([f'Log Data for Client IPAddres: {IPAddr} Pid: {getpid()}'])
     log_data.append(["Setting model for server"])
     log_data.append(["Number Push: ", n_push])
     # print(reply)
+    # print("\n\n........Params->", global_params)
+    pie.Q.load_state_dict(modman.convert_list_to_tensor(global_params))
+    pie.Q.eval()
 n_steps=n_push
 log_path = './client/logs/'
 log_file = log_id+ 'client_logs.csv'
@@ -232,7 +239,7 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
         for _ in range(TRAIN_PARAMS.LEARN_STEPS):
             # Single Learning Step
             pie.learn(exp.memory, TRAIN_PARAMS.BATCH_SIZE)
-
+            sleep(0.01)
             # Send Parameters to Server
             if (epoch+1)%n_steps==0:
                 lt2=now()
@@ -242,7 +249,8 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
                 t1=now() #time stamp at the start time for communication
 
                 # Sending Locally Trained Params
-                reply = modman.send_local_update(URL + 'collect',
+                print("Sending Local Params")
+                reply = modman.send_local_update(URL,
                  modman.convert_tensor_to_list(pie.Q.state_dict()),
                  epoch, ALIAS)
                 print(reply, "\n Local update sent")
@@ -250,7 +258,8 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
                 
                 # Wait for Model Lock to get Released
                 while modman.get_model_lock(URL, ALIAS):
-                    print("Waiting for Model Lock Release.")
+                    print("Waiting for Model Lock Release2.")
+                    sleep(0.05)
 
                 # Get Updated Model Params from Server
                 global_params, n_push,_, is_available = modman.fetch_params(URL, ALIAS)

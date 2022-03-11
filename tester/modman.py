@@ -1,91 +1,9 @@
-import torch
 import requests
 import json
-from os import getpid
 
-debug = False
+from typing import List
+import torch
 
-
-# Fetch Latest Model Params (StateDict)
-def fetch_params(url: str, model_name: str):
-    # Send GET request
-    r = requests.get(url=url + 'get/' + model_name)
-
-    # Check if Model is Available
-    if r.status_code == 404:
-        return {}, False
-
-    if r.status_code != 200:
-        print("Server Error: Could not fetch Model Parameters.\nQuitting...")
-        quit()
-
-    # Extract data in json format
-    data = r.json()
-
-    if debug:
-        print("Global Iteration", data['iteration'])
-    params = json.loads(data['Params'])
-    return params, True
-
-
-# Fetch Model Lock Status
-def model_lock(url: str, model_name: str) -> bool:
-    # Send GET request
-    r = requests.get(url=url + 'getLockStatus/' + model_name)
-
-    if r.status_code != 200:
-        print("Server Error: Could not fetch Lock Status.\nQuitting...")
-        quit()
-
-    # Extract data in json format
-    data = r.json()
-    return data['LockStatus']
-
-
-# Send Trained Model Gradients (StateDict)
-def send_model_update(url: str, model_name: str, grads: dict):
-    body = {'data': {
-        'ID': model_name,
-        'Gradients': json.dumps(grads)
-    }
-    }
-
-    # Send POST request
-    r = requests.post(url=url + 'updateGradients/' + model_name, json=body)
-
-    if r.status_code != 200:
-        print("Server Error: Could not Update Gradients.\nQuitting...")
-        quit()
-
-    # Extract data in json format
-    data = r.json()
-
-    return data['reply']
-
-
-# Send  Model Parameters (StateDict)
-def send_model_params(url: str, model_name: str, params: dict, lr: float):
-    body = {'data': {
-        'ID': model_name,
-        'Params': json.dumps(params),
-        'LearningRate': str(lr),
-    }
-    }
-
-    # Send POST request
-    r = requests.post(url=url + 'set/', json=body)
-
-    if r.status_code != 200:
-        print("Server Error: Could not Update Gradients.\nQuitting...")
-        quit()
-
-    # Extract data in json format
-    data = r.json()
-
-    return data['reply']
-
-
-# Convert State Dict List to Tensor
 def convert_list_to_tensor(params: dict) -> dict:
     params_ = {}
     for key in params.keys():
@@ -101,3 +19,58 @@ def convert_tensor_to_list(params: dict) -> dict:
         params_[key] = params[key].tolist()
 
     return params_
+
+
+#################################################################
+# Network Handlers
+#################################################################
+
+# Collect Client Params
+
+def get_client_params(url: str, model_name: str):
+
+    r = requests.get(url=url+'getclientP/'+model_name)
+    if r.status_code != 200:
+        print("Server Error: Could not fetch all params.\nQuitting...")
+        quit()
+
+    # Extract data in json format
+    data = r.json()
+    return data;
+
+
+
+# Send Trained Model Gradients (StateDict)
+def send_score(url: str, model_name: str, Score: dict):
+    body = {'data': {
+        'Score': json.dumps(Score),
+    }
+    }
+
+    # Send POST request
+    r = requests.post(url=url + 'updateScore/' + model_name, json=body)
+
+    if r.status_code != 200:
+        print("Server Error: Could not Update Score.\nQuitting...")
+        quit()
+
+    # Extract data in json format
+    data = r.json()
+    print( data['reply'])
+
+    return data['reply']
+
+# Fetch Model Lock Status  
+def get_update_lock(url: str, model_name: str):
+    
+    r = requests.get(url=url + 'getUlock/'+model_name)
+    if r.status_code != 200:
+        print("Server Error: Could not fetch Lock Status.\nQuitting...")
+        quit()
+
+    # Extract data in json format
+    data = r.json()
+    print("data->", data)
+    print("Lock data:->", data['LockStatus'])
+
+    return data['LockStatus'] 

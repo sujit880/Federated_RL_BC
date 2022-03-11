@@ -23,4 +23,5 @@ app.use(function (req, res, next) {
 require("./routes")(app);
 
 // Start Listening
-app.listen(5500, '0.0.0.0', () => console.log("Listening on port 5500."));
+// app.listen(5500, '0.0.0.0', () => console.log("Listening on port 5500."));
+app.listen(3000, '0.0.0.0', () => console.log("Listening on port 3000."));

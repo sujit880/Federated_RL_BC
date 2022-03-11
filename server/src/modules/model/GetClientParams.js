@@ -2,11 +2,13 @@ const fs = require("fs");
 const Blockchain = require("../blockchain");
 const SharDb = require("../db");
 
-module.exports = (modelID) => {
+module.exports = (params) => {
     try{
-        let bModel = Blockchain.GetModel(modelID);
+        console.log("Got Get cliemt params call.  :", params[0]);
+        let model_str = fs.readFileSync(`./models/${params[0]}.json`);
+        let bModel = JSON.parse(model_str);
         
-        let all_params = Blockchain.GetClientParams(modelID);
+        let all_params = Blockchain.GetClientParams(bModel.ModelID);
         if (all_params !==null){
             bModel.ModelReadLock = true;
         }

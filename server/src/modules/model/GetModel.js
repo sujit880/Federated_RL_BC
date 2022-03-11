@@ -12,7 +12,7 @@ module.exports = (params) => {
         let bModel = Blockchain.GetModel(params);
         bModel.ModelParams = SharDb.GetKeyValuePair(bModel.ModelParams);
         
-        console.log("Get Assembled Model Params", bModel.ModelID);
+        console.log("Returning Global Model Params", bModel.ModelID);
         return bModel;
     }catch (error) {
         console.error(error);

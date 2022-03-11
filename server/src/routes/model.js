@@ -67,11 +67,12 @@ router.get("/api/model/getclientP/:id", async (req, res) => {
         res.status(200).send(data);
     } catch (error) {
         console.error(error);
-        res.status(404).send({ message: "Model NOT found!" });
+        res.status(404).send({ message: "Clients Params NOT found!" });
     } });
 
 router.post("/api/model/set/", async (req, res) => {
     try {
+        console.log("\n\n.......**************...........\n       Setting Global Model\n");
         let reply = await ModelContract.SetModel([req.body.data.id, req.body.data.model, req.body.data.learning_rate, req.body.data.pid, req.ip]);
         if (!reply) throw "Error In Parent Methods.";
 
@@ -84,13 +85,14 @@ router.post("/api/model/set/", async (req, res) => {
 
 router.post("/api/model/collect/", async (req, res) => {
     try {
+        console.log("Clients send local params.. \n Client ip: ", req.ip, "Client pid: ", req.body.data.pid);
         let reply = await ModelContract.PostParams([req.body.data.id, req.body.data.model, req.body.data.epochs, req.body.data.pid, req.ip]);
         if (!reply) throw "Error In Parent Methods.";
 
-        res.status(200).send({ reply, message: "Model Successfully Set." });
+        res.status(200).send({ reply, message: "Client Params Successfully Collect." });
     } catch (error) {
         console.error(error);
-        res.status(500).send({ message: "Model NOT Set!" });
+        res.status(500).send({ message: "Params NOT Collect!" });
     }
 });
 
@@ -98,27 +100,29 @@ router.post("/api/model/collect/", async (req, res) => {
 
 router.post("/api/model/applyUpdate/:id", async (req, res) => {
     try {
+        console.log("\n\nApplying Update")
         let reply = await ModelContract.ApplyModelUpdate([req.params.id, req.body.data.Params]);
         if (!reply) throw "Error In Parent Methods.";
 
         res.status(200).send({ reply, message: "Global Model Update Applied Successfully." });
     } catch (error) {
         console.error(error);
-        res.status(500).send({ message: "Model Update NOT Applied!" });
+        res.status(500).send({ message: "Global Model Update NOT Applied!" });
     }
 });
 
-router.get("/api/model/getLockStatus/:id", async (req, res) => {
-    try {
-        let data = await ModelContract.GetLockStatus([req.params.id]);
-        if (data == null) throw "Error In Parent Methods.";
-
-        res.status(200).send({ LockStatus: data });
-    } catch (error) {
+router.post("/api/model/updateScore/:id", async (req, res) => {
+    try{
+        console.log("\n\nGot UpdateScore Call.");
+        let reply = await ModelContract.UpdateScore([req.params.id, req.body.data.Score]);
+        if (!reply) throw "Error In Parents Method";
+        console.log( "Scores For Clients Are Successfully Updated.\n");
+        res.status(200).send({ reply, message: "Scores For Clients Are Successfully Updated."});
+    }catch (error) {
         console.error(error);
-        res.status(404).send({ message: "Lock Status Error!" });
+        res.status(500).send({ message: "Score Update NOT Applied!" });
     }
-});
+} );
 
 
 module.exports = router;

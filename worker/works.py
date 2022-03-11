@@ -10,7 +10,7 @@ def Federated_average(list_of_params):
         print("Error gradient list is empty")
         return {}
     if (len(list_of_params)==1):
-        return list_of_params[0]
+        return modman.convert_list_to_tensor(list_of_params[0][0])
     average_gradient={}
     total_sample=0
     for _,x in list_of_params:
@@ -37,7 +37,7 @@ def Federated_average(list_of_params):
             continue
         for i in range(len(layer_names)):            
             average_gradient[layer_names[i]]=np.add(average_gradient[layer_names[i]],list_of_params[indices][0][layer_names[i]]).tolist()
-    return average_gradient;
+    return modman.convert_list_to_tensor(average_gradient);
 
 @torch.no_grad()
 def FederatedAveragingModel(accu_params: list, global_model: dict) -> dict:

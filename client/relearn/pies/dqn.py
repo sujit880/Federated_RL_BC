@@ -4,15 +4,16 @@ import numpy as np
 
 import torch as T
 import torch.nn as nn
+#import torch.optim as optim
+#import torch.nn.functional as F
 
-from relearn.pies.utils import RMSprop_update
 from copy import deepcopy
 
 
 class QnetRELUn(nn.Module):
     def __init__(self, state_dim, LL, action_dim):
         super(QnetRELUn, self).__init__()
-        
+        #self.flatten = nn.Flatten()
         self.n_layers = len(LL)
         if self.n_layers < 1:
             raise ValueError('need at least 1 layers')
@@ -101,7 +102,7 @@ class PIE:
 
     def _prepare_batch(self, memory, size):
         batch = memory.sample(size)
-        
+        #print("Batch", batch)
         steps = len(batch)
         cS, nS, act, reward, done = [], [], [], [], []
         for i in batch:
@@ -118,7 +119,7 @@ class PIE:
             T.tensor(reward, dtype=T.float32).to(self.device), \
             T.tensor(done, dtype=T.float32).to(self.device)
 
-    def learn(self, memory, batch_size, step=False):
+    def learn(self, memory, batch_size):
         steps, indices, cS, nS, act, reward, done = self._prepare_batch(
             memory, batch_size)
         target_val = self.T(nS)
@@ -136,63 +137,17 @@ class PIE:
         target = pred.detach().clone()
         target[indices, act[indices]] = updated_q_values[indices]
         loss = self.loss_fn(pred, target)  # T.tensor()
-
-        # this does not happen
-        #target[indices, act[indices]] = updated_q_values[indices]*(self.theta) + target[indices, act[indices]]*(1-self.theta)
-
+        
         # Backpropagation
         self.optimizer.zero_grad()
         loss.backward()
+        self.optimizer.step()
+        self.train_count+=1
 
-        grad_dict = {}
-        grads = []
-        params_with_grad=[]
-
-        square_avgs = []
-        lr=0.01
-        alpha=0.9
-        eps=0
-        weight_decay=0
-
-        for group in self.optimizer.param_groups:
-            lr=group['lr']
-            alpha=group['alpha']
-            eps=group['eps']
-            weight_decay=group['weight_decay']
-
-            for p in group['params']:
-                if p.grad is None:
-                    continue
-                params_with_grad.append(p)
-
-                if p.grad.is_sparse:
-                    raise RuntimeError('RMSprop does not support sparse gradients')
-                grads.append(p.grad.data.detach().clone().tolist())
-                state = self.optimizer.state[p]
-                if len(state) == 0:
-                    state['step'] = 0
-                    state['square_avg'] = T.zeros_like(p, memory_format=T.preserve_format)
-                square_avgs.append(state['square_avg'])
-                state['step'] += 1
-        if step:
-            RMSprop_update(params_with_grad,
-                    grads,
-                    square_avgs,
-                    weight_decay,
-                    lr,
-                    eps,                 
-                    alpha)
-
-
-
-        self.train_count += 1
-
-        if (self.tuf > 0):
+        if (self.tuf>0):
             if self.train_count % self.tuf == 0:
                 self.T.load_state_dict(self.Q.state_dict())
-                self.update_count += 1
-        self.optimizer.zero_grad()
-        return grads
+                self.update_count+=1
 
     def render(self, mode=0, p=print):
         p('=-=-=-=-==-=-=-=-=\nQ-NET\n=-=-=-=-==-=-=-=-=')

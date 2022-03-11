@@ -14,20 +14,26 @@ module.exports = (params) => {
         let collection_str = fs.readFileSync(`./models/${model.ModelID}U.json`);
         let collected_params = JSON.parse(collection_str);
         iteration = collected_params.Iteration;
+        console.log("check-B-GetModel1 after iteratio");
         // collected_params.AllClients.push("hello")
         console.log("All clients", collected_params.AllClients);
         if (!collected_params.AllClients.includes(key)){
             collected_params.AllClients.push(key);
             collected_params.NClients = collected_params.AllClients.length;
-            
+            console.log("All clients after insertion", collected_params.AllClients);
         }
-        if ( collected_params.Scores[key] === undefined) {
-            collected_params.Scores[key] = 200;
-            console.log("New score is given to client key", key);
+
+        let test_scores_str = fs.readFileSync(`./models/${collected_params.ModelID}_TS.json`);
+        let test_scores = JSON.parse(test_scores_str);
+        if ( test_scores.Scores[key] === undefined) {
+            test_scores.Scores[key] = test_scores.Base_Score;
+            console.log("New score is given to client key", key, "\nScores:",test_scores.Scores);
         }
-        console.log("ALL clients scores: ", Object.keys(collected_params.Scores), " -> ", Object.values(collected_params.Scores));
+        console.log("\nALL clients scores: ", Object.keys(test_scores.Scores), " -> ", Object.values(test_scores.Scores));
+        fs.writeFileSync(`./models/${test_scores.ModelID}_TS.json`, JSON.stringify(test_scores));
+
         fs.writeFileSync(`./models/${collected_params.ModelID}U.json`, JSON.stringify(collected_params));
-        console.log("Updated collected params", collected_params.ModelID);
+        console.log("Updated collected params file", collected_params.ModelID);
         return model;
     }
     catch (error){

@@ -6,6 +6,7 @@ const GetULock = require("./GetULock");
 const GetClientParams = require("./GetClientParams");
 const PostParams = require("./PostParams");
 const GetLock = require("./GetLock");
+const UpdateScore = require("./UpdateScore");
 
 module.exports = {
     SetModel,
@@ -16,5 +17,6 @@ module.exports = {
     GetClientParams,
     PostParams,
     GetLock,
+    UpdateScore,
 
 };
