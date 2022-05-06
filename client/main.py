@@ -47,6 +47,9 @@ ip_address = "172.16.26.15"  # server macine ip address
 
 URL = "http://localhost:3000/api/model/"
 
+# ip_address = "172.16.27.168"
+URL = "http://"+ip_address+":3000/api/model/"
+
 # ..
 
 class INFRA:
