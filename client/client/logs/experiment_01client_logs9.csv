@@ -1,0 +1,126 @@
+Log Data for Client IPAddres: 127.0.1.1 Pid: 5190
+Log Data for Client IPAddres: 127.0.1.1 Pid: 5190
+Setting model for server
+Number Push: ,50
+Start Training...
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+"
+Total number of epochs: 4879"
+"
+Time Elapsed:",0:12:54.893126
+"
+Mean Learning Time:",0:00:00.118693
+MAX Learning Time:,0:00:00.668027
+MIN Learning Time:,0:00:00.011842
+"
+Mean Communication Time:",0:00:00.317488
+MAX Communication Time:,0:00:07.437645
+MIN Communication Time:,0:00:00.040432
+"
+Total Learning Time:->",0:00:11.513213
+"
+Total Communication delay:->",0:00:30.796362
+"
+Mean time for epoch:",0:00:00.074901
+MIN time for epoch:,0:00:00.000211
+MAX time for epoch:,0:00:07.453338
+"
+Total time for epoch:->",0:06:05.518225
+"
+Total time for testing:->",0:06:49.256642

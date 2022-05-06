@@ -303,7 +303,7 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
         P('[#]'+str(epoch+1), '\t',
             '[REW]'+str(trew),
             '[TR]'+str(pie.train_count),
-            '[UP]'+str(pie.update_count))
+            '[UP]'+str(pie.update_count), '[MEAN]'+str(np.mean(max_reward1.queue)))
         LOG_CSV +=f'{str(epoch+1)},{str(trew)},{str(pie.train_count)},{str(pie.update_count)}\n'
         REW.append(["Rew: ",trew, "Train_count: ", pie.train_count, "Update_count: ", pie.update_count])
         if(max_reward1.full()):
@@ -313,6 +313,9 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
     tft.append(etft-stft)
 
 P('Finished Training!')
+log_dir = './logs_csv/'
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
 sav_instance_path = f'{log_dir+ENV_NAME}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}_finished'
 with open(sav_instance_path +'.csv', 'w' ) as f:
     f.write(LOG_CSV)
