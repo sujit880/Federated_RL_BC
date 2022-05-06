@@ -1,0 +1,150 @@
+Log Data for Client IPAddres: 127.0.1.1 Pid: 10820
+Log Data for Client IPAddres: 127.0.1.1 Pid: 10820
+Setting model for server
+Number Push: ,50
+Start Training...
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+"
+Total number of epochs: 6069"
+"
+Time Elapsed:",0:26:58.754397
+"
+Mean Learning Time:",0:00:00.168320
+MAX Learning Time:,0:00:00.731087
+MIN Learning Time:,0:00:00.011796
+"
+Mean Communication Time:",0:00:00.535265
+MAX Communication Time:,0:00:17.176777
+MIN Communication Time:,0:00:00.047738
+"
+Total Learning Time:->",0:00:20.366750
+"
+Total Communication delay:->",0:01:04.767015
+"
+Mean time for epoch:",0:00:00.122611
+MIN time for epoch:,0:00:00.000231
+MAX time for epoch:,0:00:17.189269
+"
+Total time for epoch:->",0:12:24.249752
+"
+Total time for testing:->",0:14:34.342628

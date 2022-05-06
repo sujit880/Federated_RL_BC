@@ -24,9 +24,11 @@ module.exports = (model) => {
 
         // Removing inactive clients from all clients set.
         for (let i=0; i<remove_clients_list.length; i++){
+            console.log("\n\n************************\nRemoving Clients");
             const index = collected_params.AllClients.indexOf(remove_clients_list[i]);
             if (index > -1) {
                 collected_params.AllClients.splice(index, 1); // 2nd parameter means remove one item only
+                console.log("\nClients Removed: ", remove_clients_list[i]);
             }
         }
         // Updated #clients for next iteration.

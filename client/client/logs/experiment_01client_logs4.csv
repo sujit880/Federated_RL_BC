@@ -1,0 +1,154 @@
+Log Data for Client IPAddres: 127.0.1.1 Pid: 19643
+Log Data for Client IPAddres: 127.0.1.1 Pid: 19643
+Setting model for server
+Number Push: ,50
+Start Training...
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+"
+Total number of epochs: 6249"
+"
+Time Elapsed:",0:06:26.251843
+"
+Mean Learning Time:",0:00:00.012909
+MAX Learning Time:,0:00:00.021334
+MIN Learning Time:,0:00:00.011557
+"
+Mean Communication Time:",0:00:02.282931
+MAX Communication Time:,0:00:05.951000
+MIN Communication Time:,0:00:00.293095
+"
+Total Learning Time:->",0:00:01.613681
+"
+Total Communication delay:->",0:04:45.366391
+"
+Mean time for epoch:",0:00:00.059395
+MIN time for epoch:,0:00:00.000818
+MAX time for epoch:,0:00:05.962747
+"
+Total time for epoch:->",0:06:11.218897
+"
+Total time for testing:->",0:00:14.896741

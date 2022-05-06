@@ -1,0 +1,49 @@
+Log Data for Client IPAddres: 127.0.1.1 Pid: 11512
+Log Data for Client IPAddres: 127.0.1.1 Pid: 11512
+Model exist
+Loading Q params .......
+Number Push: ,50
+Start Training...
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+"
+Total number of epochs: 989"
+"
+Time Elapsed:",0:00:16.297640
+"
+Mean Learning Time:",0:00:00.013751
+MAX Learning Time:,0:00:00.021488
+MIN Learning Time:,0:00:00.011621
+"
+Mean Communication Time:",0:00:00.013749
+MAX Communication Time:,0:00:00.020382
+MIN Communication Time:,0:00:00.008768
+"
+Total Learning Time:->",0:00:00.261272
+"
+Total Communication delay:->",0:00:00.261239
+"
+Mean time for epoch:",0:00:00.013719
+MIN time for epoch:,0:00:00.000155
+MAX time for epoch:,0:00:00.038114
+"
+Total time for epoch:->",0:00:13.582213
+"
+Total time for testing:->",0:00:02.673407

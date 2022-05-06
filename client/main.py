@@ -7,7 +7,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
-
+import os
 import relearn.pies.dqn as DQN
 from relearn.explore import EXP, MEM
 from relearn.pies.utils import compare_weights
@@ -64,12 +64,12 @@ EXP_PARAMS.DECAY_ADD = 0
 
 
 PIE_PARAMS = INFRA()
-PIE_PARAMS.LAYERS = [28, 28, 28]
-PIE_PARAMS.OPTIM = torch.optim.Adam # 1. RMSprop, 2. Adam, 3. SGD
+PIE_PARAMS.LAYERS = [128, 128, 128]
+PIE_PARAMS.OPTIM = torch.optim.RMSprop # 1. RMSprop, 2. Adam, 3. SGD
 PIE_PARAMS.LOSS = torch.nn.MSELoss
 PIE_PARAMS.LR = 0.001
 PIE_PARAMS.DISCOUNT = 0.999999
-PIE_PARAMS.DOUBLE = False
+PIE_PARAMS.DOUBLE = True
 PIE_PARAMS.TUF = 4
 PIE_PARAMS.DEV = 'cpu'
 
@@ -150,6 +150,10 @@ target = DQN.PIE(
     tuf=PIE_PARAMS.TUF,
     seed=None)
 log_data=[]
+
+# Logging CSV string
+LOG_CSV = 'epoch,reward,tr,up\n'
+
 ##############################################
 # Fetch Initial Model Params (If Available)
 ##############################################
@@ -230,6 +234,15 @@ lt1=now() # setting initial learning time
 for epoch in range(0, TRAIN_PARAMS.EPOCHS):
     stpc = now() # start time for epoch
     lt1 +=(now()-lt1)  # time at epoch start
+
+    if((epoch+1)% 2000 == 0):
+        log_dir = './logs_csv/'
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+        sav_instance_path = f'{log_dir+ENV_NAME}_{stpc.strftime("%d_%m_%Y-%H_%M_%S")}'
+        with open(sav_instance_path +'.csv', 'w' ) as f:
+            f.write(LOG_CSV)
+
     # exploration
     _ = exp.explore(pie, moves=TRAIN_PARAMS.MOVES,
                     decay=decayF, episodic=TRAIN_PARAMS.EPISODIC)
@@ -291,13 +304,19 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
             '[REW]'+str(trew),
             '[TR]'+str(pie.train_count),
             '[UP]'+str(pie.update_count))
+        LOG_CSV +=f'{str(epoch+1)},{str(trew)},{str(pie.train_count)},{str(pie.update_count)}\n'
         REW.append(["Rew: ",trew, "Train_count: ", pie.train_count, "Update_count: ", pie.update_count])
         if(max_reward1.full()):
-            if(np.mean(max_reward1.queue) >= 200):
+            if(np.mean(max_reward1.queue) >= 195):
                 break
     etft = now() # End time for testing
     tft.append(etft-stft)
+
 P('Finished Training!')
+sav_instance_path = f'{log_dir+ENV_NAME}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}_finished'
+with open(sav_instance_path +'.csv', 'w' ) as f:
+    f.write(LOG_CSV)
+
 elapse = now() - stamp
 P('Time Elapsed:', elapse)
 P('Mean Learning Time:', np.mean(L_T))
