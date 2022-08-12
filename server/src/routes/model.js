@@ -59,6 +59,7 @@ router.get("/api/model/get/:id", async (req, res) => {
         res.status(404).send({ message: "Model NOT found!" });
     } });
 
+// Worker side communication
 router.get("/api/model/getclientP/:id", async (req, res) => {
     try {
         let data = await ModelContract.GetClientParams([req.params.id]);

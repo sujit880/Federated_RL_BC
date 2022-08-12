@@ -15,8 +15,8 @@ module.exports = (ModelID) => {
         console.log("\n*****Check delete after check****\nGet Clientparams-> Client keys:", client_keys,"\n All Params: ", collected_params.AllParams);
         for (let i=0; i<client_keys.length; i++){
             if(test_score.Scores[client_keys[i]] === undefined) throw "Error with clients key!!"            
-            params = SharDb.GetClientParamsPair(client_keys[i]);
-            all_params_wscore[client_keys[i]]=[params,test_score.Scores[client_keys[i]]];
+            // params = SharDb.GetClientParamsPair(client_keys[i]);
+            all_params_wscore[collected_params.AllParams[client_keys[i]]]=test_score.Scores[client_keys[i]];
         }
         console.log("Get all client params for aggregation", collected_params.ModelID);
         return all_params_wscore;

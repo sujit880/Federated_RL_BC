@@ -10,10 +10,10 @@ module.exports = (params) => {
         const modelHistory = parseInt(process.env.NUM_MODEL_HISTORY);
 
         // Delete Old Param Shards
-        ShardDB.DeleteKeyValuePair(model.ModelParams); // Delete old global params
+        // ShardDB.DeleteKeyValuePair(model.ModelParams); // Delete old global params
 
-        //
-        model.ModelParams = ShardDB.SetKeyValuePair(params[1]);
+        // This will work only for one worker scenario
+        model.ModelParams = params[1];
 
         // Set Model History Length
         params.push(process.env.NUM_MODEL_HISTORY);

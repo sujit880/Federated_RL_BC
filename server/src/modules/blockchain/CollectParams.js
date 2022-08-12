@@ -11,7 +11,7 @@ module.exports = (params) => {
         // };
         // console.log("storing client params of client", collectparams.ClientKey);
         // fs.writeFileSync(`./all_params/${collectparams.ClientKey}.json`, JSON.stringify(collectparams));
-        let client_key = params[1];
+        let client_key = params[3];
         let client_epochs = params[2];
         // let updated_iteration = params[3];
 
@@ -26,7 +26,7 @@ module.exports = (params) => {
 
         // Updating Params Collection File to Log New Updates.. 
         if(!collected_params.AllClients.includes(client_key)) throw "Clients key Error! Security breach!!.."
-        collected_params.AllParams[params[1]]= params[1];
+        collected_params.AllParams[client_key]= params[1];
 
         total_collection = Object.keys(collected_params.AllParams).length;
         console.log("Total local collection: ", total_collection, "#Clients: ", collected_params.NClients);

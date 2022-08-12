@@ -1,0 +1,92 @@
+Log Data for Client IPAddres: 127.0.1.1 Pid: 317
+Log Data for Client IPAddres: 127.0.1.1 Pid: 317
+Setting model for server
+Number Push: ,50
+Start Training...
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+reply,message
+"
+Total number of epochs: 3169"
+"
+Time Elapsed:",0:02:39.884823
+"
+Mean Learning Time:",0:00:00.012885
+MAX Learning Time:,0:00:00.047937
+MIN Learning Time:,0:00:00.011771
+"
+Mean Communication Time:",0:00:01.603448
+MAX Communication Time:,0:00:09.279719
+MIN Communication Time:,0:00:01.048186
+"
+Total Learning Time:->",0:00:00.811779
+"
+Total Communication delay:->",0:01:41.017218
+"
+Mean time for epoch:",0:00:00.046596
+MIN time for epoch:,0:00:00.000221
+MAX time for epoch:,0:00:09.293317
+"
+Total time for epoch:->",0:02:27.709133
+"
+Total time for testing:->",0:00:12.082116

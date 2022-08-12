@@ -3,6 +3,12 @@ import json
 
 from typing import List
 import torch
+import ipfshttpclient as ipfs
+
+## Create IPFS Client
+client = ipfs.connect("/ip4/172.16.26.15/tcp/5001/http")
+
+
 
 def convert_list_to_tensor(params: dict) -> dict:
     params_ = {}
@@ -36,14 +42,39 @@ def get_client_params(url: str, model_name: str):
 
     # Extract data in json format
     data = r.json()
-    return data;
+
+    print('data reply', data)
+
+    clients = data["clients"]
+    clients_hash = clients.keys()
+    clients_params ={}
+    for x in clients_hash:
+        value1 = client.get_json(x)
+        client_params =json.loads(value1["params"])
+        # print("Params:", value)
+        clients_params[x]=[client_params,clients[x]]
+    # global_params = client.cat(data["global_params"]) 
+    value1 = client.get_json(data["global_params"])
+    global_params =json.loads(value1["params"])
+    return clients_params, global_params;
 
 
 
 # Send Trained Model Gradients (StateDict)
 def send_global_model_update(url: str, model_name: str, params: dict):
+
+    #Upload parameters to IPFS
+    parameters = {"params": json.dumps(params)}
+    params_hash = client.add_json(parameters)
+    
+    # body = {'data': {
+    #     'Params': params_hash,
+    #     'report': report
+    # }
+    # }
+
     body = {'data': {
-        'Params': json.dumps(params),
+        'Params': params_hash,
     }
     }
 

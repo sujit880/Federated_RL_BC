@@ -14,8 +14,8 @@ module.exports = (params) => {
         // params.push(iteration);
         client_key = params[4]+params[3];
         const key = md5(client_key);
-        params[1] = ShardDB.SetClientParamsPair([key, params[1] ]);
-        const collected_params = Blockchain.CollectParams([params[0],params[1],params[2]]);  //Iteration not declared
+        // params[1] = ShardDB.SetClientParamsPair([key, params[1] ]);
+        const collected_params = Blockchain.CollectParams([params[0],params[1],params[2], key]);  //Iteration not declared
         console.log(collected_params.ModelID, "Model params collected");
         return collected_params;
     }catch (error) {

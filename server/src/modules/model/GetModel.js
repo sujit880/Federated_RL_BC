@@ -10,7 +10,7 @@ module.exports = (params) => {
         const key = md5(client_key);
         params.push(key);
         let bModel = Blockchain.GetModel(params);
-        bModel.ModelParams = SharDb.GetKeyValuePair(bModel.ModelParams);
+        // bModel.ModelParams = SharDb.GetKeyValuePair(bModel.ModelParams);
         
         console.log("Returning Global Model Params", bModel.ModelID);
         return bModel;

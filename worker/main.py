@@ -8,6 +8,7 @@ import test_score as ts
 import verifyer as vf
 from time import sleep
 
+
 # Model Name / ALIAS (in Client)
 ALIAS = 'experiment_01'
 
@@ -18,19 +19,19 @@ URL = "http://localhost:3000/api/model/"
 
 while True:
     if modman.get_update_lock(URL, ALIAS):
-        all_params_wscore = modman.get_client_params(URL, ALIAS)
+        all_params_wscore, global_params = modman.get_client_params(URL, ALIAS)
         all_val_params=[]
         Scores={}
         keys = all_params_wscore.keys()
         for c_key in keys:
             params, score = all_params_wscore[c_key]
-            key, score = ts.Test_Params(params=json.loads(params), client_key=c_key)
+            key, score = ts.Test_Params(params=params, client_key=c_key)
             # all_params.append([json.loads(params),score])
             Scores[key] = score
         honest, malicious_client = vf.verifier(Scores=Scores)
         for client_key in honest:
             params, score = all_params_wscore[client_key]
-            all_val_params.append([json.loads(params),Scores[client_key]])
+            all_val_params.append([params,Scores[client_key]])
 
         ##############################
         # Aggregate all valid params  

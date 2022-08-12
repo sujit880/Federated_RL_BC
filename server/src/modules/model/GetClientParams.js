@@ -14,7 +14,11 @@ module.exports = (params) => {
         }
         fs.writeFileSync(`./models/${bModel.ModelID}.json`, JSON.stringify(bModel));
         console.log("Model Lock status update..", bModel.ModelID);
-        return all_params;
+        data = {
+            clients: all_params,
+            global_params: bModel.ModelParams,
+        } ;
+        return data ;
     }catch (error) {
         console.error(error);
         return null;

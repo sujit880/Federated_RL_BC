@@ -15,7 +15,8 @@ module.exports = (model) => {
         let client_keys = Object.keys(collected_params.AllParams);
         for(let i=0; i<collected_params.AllClients.length;i++){
             if (client_keys.includes(collected_params.AllClients[i])){
-                ShardDB.DeleteClientParamsPair(collected_params.AllClients[i]);
+                // ShardDB.DeleteClientParamsPair(collected_params.AllClients[i]);
+                continue;
             }
             else{
                 remove_clients_list.push(collected_params.AllClients[i]);

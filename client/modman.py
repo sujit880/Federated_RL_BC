@@ -6,6 +6,10 @@ import csv
 import glob
 from pathlib import Path
 import re
+import ipfshttpclient as ipfs
+
+## Create IPFS Client
+client = ipfs.connect("/ip4/172.16.26.15/tcp/5001/http")
 
 debug = False
 # Fetch Latest Model Params (StateDict)
@@ -48,7 +52,12 @@ def fetch_params(url: str, Id: str):
     # else:
     #     if debug:
     print("Global Iteration", data['Iteration'])
-    global_params = json.loads(data['ModelParams'])
+    global_params_hash = data['ModelParams']
+
+    ## Fetch global parameters from IPFS
+    value1 = client.get_json(global_params_hash)
+    global_params =json.loads(value1["params"])
+
     print("\nglobal paramas type: ", type(global_params))
     return global_params, data['NPush'], data['ModelID'], True
 # remove send gradient method as we are not dealing with gradients in FL
@@ -71,9 +80,14 @@ def get_model_lock(url: str, Id: str) -> bool:
     return data['LockStatus']
 
 def send_local_update(url: str, params: dict, epochs: int, Id: str):
+
+    #Upload parameters to IPFS
+    parameters = {"params": json.dumps(params)}
+    params_hash = client.add_json(parameters)
+
     body =  {'data':{
         'id' : Id,
-        'model': json.dumps(params),
+        'model': params_hash,
         'pid': getpid(),
         'epochs': epochs
     }
@@ -89,9 +103,13 @@ def send_local_update(url: str, params: dict, epochs: int, Id: str):
 
 
 def send_model_params(url: str, params: dict, lr: float, Id: str):
+
+    #Upload parameters to IPFS
+    parameters = {"params": json.dumps(params)}
+    params_hash = client.add_json(parameters)
     body = { 'data':{
         'id' : Id,
-        'model': json.dumps(params),
+        'model': params_hash,
         'learning_rate': lr,
         'pid': getpid()
     }
@@ -103,8 +121,10 @@ def send_model_params(url: str, params: dict, lr: float, Id: str):
     # Extract data in json format
     data = r.json()
 
+    print('data reply', data)
+
     print("data-->", data['Iteration'])
-    return json.loads(data['ModelParams']), data['NPush'], data['ModelID'], data['Iteration']
+    return data['ModelParams'], data['NPush'], data['ModelID'], data['Iteration']
 # Convert State Dict List to Tensor
 def convert_list_to_tensor(params: dict) -> dict:
     params_ = {}
