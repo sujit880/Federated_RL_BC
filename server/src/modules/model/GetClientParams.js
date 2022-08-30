@@ -16,6 +16,8 @@ module.exports = async (params) => {
             bModel.ModelReadLock = true;
         }
         // fs.writeFileSync(`./models/${bModel.ModelID}.json`, JSON.stringify(bModel));
+        await BlockAPI.Set(`${bModel.ModelID}`, JSON.stringify(bModel));
+        
         console.log("Model Lock status update..", bModel.ModelID);
         data = {
             clients: all_params,
