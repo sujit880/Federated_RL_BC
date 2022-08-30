@@ -2,7 +2,7 @@ const fs = require("fs");
 
 const BlockAPI = require('../block-api')
 
-module.exports = (ModelID) => {
+module.exports = async (ModelID) => {
     try {
         // let modstr = fs.readFileSync(`./models/${ModelID}.json`);
         let modstr = await BlockAPI.Get(`${ModelID}`);

@@ -11,6 +11,8 @@ module.exports = async (params) => {
         let model_str = await BlockAPI.Get(`${params[0]}`);
         
         let model = JSON.parse(model_str);
+
+        console.log(model)
         
         console.log("Model_params_get", model.ModelID);
 
