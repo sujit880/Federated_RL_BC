@@ -1,18 +1,21 @@
 const fs = require("fs");
 const Blockchain = require("../blockchain");
 const SharDb = require("../db");
+const BlockAPI = require('../block-api')
 
-module.exports = (params) => {
+module.exports = async (params) => {
     try{
         console.log("Got Get cliemt params call.  :", params[0]);
-        let model_str = fs.readFileSync(`./models/${params[0]}.json`);
+        // let model_str = fs.readFileSync(`./models/${params[0]}.json`);
+        let model_str = await BlockAPI.Get(`${params[0]}`);
+        
         let bModel = JSON.parse(model_str);
         
-        let all_params = Blockchain.GetClientParams(bModel.ModelID);
+        let all_params = await Blockchain.GetClientParams(bModel.ModelID);
         if (all_params !==null){
             bModel.ModelReadLock = true;
         }
-        fs.writeFileSync(`./models/${bModel.ModelID}.json`, JSON.stringify(bModel));
+        // fs.writeFileSync(`./models/${bModel.ModelID}.json`, JSON.stringify(bModel));
         console.log("Model Lock status update..", bModel.ModelID);
         data = {
             clients: all_params,

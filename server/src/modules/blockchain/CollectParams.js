@@ -1,7 +1,8 @@
 const fs = require("fs");
 const md5 = require("md5");
+const BlockApi = require("../block-api");
 
-module.exports = (params) => {
+module.exports = async (params) => {
     try {
         // collectparams = {
         //     ModelID: params[0],
@@ -16,12 +17,16 @@ module.exports = (params) => {
         // let updated_iteration = params[3];
 
         // Read Global model....
-        let model_str = fs.readFileSync(`./models/${params[0]}.json`);
+        // let model_str = fs.readFileSync(`./models/${params[0]}.json`);
+        let model_str = await BlockApi.Get(`${params[0]}`);
+        
         let model = JSON.parse(model_str);
         let iteration = model.Iteration;
 
         // Read Collection params file....
-        let collection_str = fs.readFileSync(`./models/${params[0]}U.json`);
+        // let collection_str = fs.readFileSync(`./models/${params[0]}U.json`);
+        let collection_str = await BlockApi.Get(`${params[0]}U`);
+        
         let collected_params = JSON.parse(collection_str);
 
         // Updating Params Collection File to Log New Updates.. 
@@ -32,7 +37,9 @@ module.exports = (params) => {
         console.log("Total local collection: ", total_collection, "#Clients: ", collected_params.NClients);
         if (!model.ModelReadLock && total_collection>=collected_params.NClients ){
             model.ModelReadLock = true;
-            fs.writeFileSync(`./models/${model.ModelID}.json`, JSON.stringify(model));
+            // fs.writeFileSync(`./models/${model.ModelID}.json`, JSON.stringify(model));
+            await BlockApi.Set(`${model.ModelID}`, JSON.stringify(model))
+
             console.log(model.ModelID,"Model read lock updated", model.ModelReadLock);
         } 
         // params.push(iteration);
@@ -52,7 +59,10 @@ module.exports = (params) => {
         if (total_collection == collected_params.NClients){
             collected_params.Lock = true;
         }
-        fs.writeFileSync(`./models/${collected_params.ModelID}U.json`, JSON.stringify(collected_params));
+        // fs.writeFileSync(`./models/${collected_params.ModelID}U.json`, JSON.stringify(collected_params));
+        await BlockApi.Set(`${collected_params.ModelID}U`, JSON.stringify(collected_params))
+
+
         console.log("Created File for collected params", collected_params.ModelID);
         return collected_params;
     } catch (error) {

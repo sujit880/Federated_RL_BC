@@ -1,7 +1,7 @@
-const fs = require("fs");
-const ShardDB = require("../db");
+const BlockAPI = require("../block-api");
+// const ShardDB = require("../db");
 
-module.exports = (model) => {
+module.exports = async (model) => {
     try {
         // model = params[0];
         // console.log("\n\n.....Checkeng model Delete after Check....\nModel: ", model);
@@ -9,7 +9,9 @@ module.exports = (model) => {
         model.ModelUpdateCount +=1;
         model.ModelReadLock = false;
 
-        let collection_str = fs.readFileSync(`./models/${model.ModelID}U.json`);
+        // let collection_str = fs.readFileSync(`./models/${model.ModelID}U.json`);
+        let collection_str = await BlockAPI.Get(model.ModelID+'U');
+        
         let collected_params = JSON.parse(collection_str);
         let remove_clients_list = [];
         let client_keys = Object.keys(collected_params.AllParams);
@@ -42,10 +44,14 @@ module.exports = (model) => {
         collected_params.AllParams = {};
         collected_params.Lock = false;
 
-        fs.writeFileSync(`./models/${collected_params.ModelID}U.json`, JSON.stringify(collected_params));
+        // fs.writeFileSync(`./models/${collected_params.ModelID}U.json`, JSON.stringify(collected_params));
+        await BlockAPI.Set(`${collected_params.ModelID}U`, JSON.stringify(collected_params));
+
         console.log("Created File for collected params", collected_params.ModelID);
 
-        fs.writeFileSync(`./models/${model.ModelID}.json`, JSON.stringify(model));
+        // fs.writeFileSync(`./models/${model.ModelID}.json`, JSON.stringify(model));
+        await BlockAPI.Set(`${model.ModelID}`, JSON.stringify(model));
+
         console.log("Model Params Set", model.ModelID);
         return model;
     } catch (error) {

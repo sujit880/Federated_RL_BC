@@ -1,9 +1,9 @@
 const fs = require("fs");
 const Blockchain = require("../blockchain");
 
-module.exports = (params) => {
+module.exports = async (params) => {
     try {
-        let bModelLock = Blockchain.GetLockStatus(params);
+        let bModelLock = await Blockchain.GetLockStatus(params);
 
         console.log("Assembled Model Lock Status", params[0]);
         return bModelLock;

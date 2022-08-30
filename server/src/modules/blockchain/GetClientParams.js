@@ -1,12 +1,16 @@
 const fs = require("fs");
 const SharDb = require("../db");
+const BlockAPI = require('../block-api')
 
-module.exports = (ModelID) => {
+module.exports = async (ModelID) => {
     try{
-        let collection_str = fs.readFileSync(`./models/${ModelID}U.json`);
+        // let collection_str = fs.readFileSync(`./models/${ModelID}U.json`);
+        let collection_str = await BlockAPI.Get(`${ModelID}U`);
+        
         let collected_params = JSON.parse(collection_str);
 
-        let score_str = fs.readFileSync(`./models/${ModelID}_TS.json`);
+        // let score_str = fs.readFileSync(`./models/${ModelID}_TS.json`);
+        let score_str = await BlockAPI.Get(`${ModelID}_TS`);
         test_score = JSON.parse(score_str);
 
         let all_params_wscore={};

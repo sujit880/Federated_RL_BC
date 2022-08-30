@@ -1,8 +1,11 @@
 const fs = require("fs");
+const BlockAPI = require('../block-api')
 
-module.exports = (ModelID) => {
+module.exports = async (ModelID) => {
     try{
-        let all_params_str = fs.readFileSync(`./model/${ModelID}all_params.json`);
+        // let all_params_str = fs.readFileSync(`./model/${ModelID}all_params.json`);
+        let all_params_str = await BlockAPI.Get(`${ModelID}all_params`);
+        
         let all_params = JSON.parse(all_params_str);
         console.log("Get all params list", all_params.ModelID);
         return all_params;

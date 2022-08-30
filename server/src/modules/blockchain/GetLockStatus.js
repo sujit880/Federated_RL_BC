@@ -1,8 +1,11 @@
 const fs = require("fs");
+const BlockAPI = require('../block-api')
 
 module.exports = (ModelID) => {
     try {
-        let modstr = fs.readFileSync(`./models/${ModelID}.json`);
+        // let modstr = fs.readFileSync(`./models/${ModelID}.json`);
+        let modstr = await BlockAPI.Get(`${ModelID}`);
+        
         let model = JSON.parse(modstr);
         console.log("Model Lock Status Get", model.ModelID);
         return model.ModelLock;

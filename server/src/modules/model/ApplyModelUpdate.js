@@ -1,11 +1,15 @@
 const fs = require("fs");
+const BlockAPI = require('../block-api')
 const Blockchain = require("../blockchain");
 const ShardDB = require("../db");
 
-module.exports = (params) => {
+
+module.exports = async (params) => {
     try {
         // let bModel = Blockchain.GetModel([params[0]]);
-        let model_str = fs.readFileSync(`./models/${params[0]}.json`);
+        // let model_str = fs.readFileSync(`./models/${params[0]}.json`);
+        let model_str = await BlockAPI.Get(`${params[0]}`);
+        
         let model = JSON.parse(model_str);
         const modelHistory = parseInt(process.env.NUM_MODEL_HISTORY);
 
@@ -18,7 +22,7 @@ module.exports = (params) => {
         // Set Model History Length
         params.push(process.env.NUM_MODEL_HISTORY);
 
-        const Umodel = Blockchain.ApplyModelUpdate(model);
+        const Umodel = await Blockchain.ApplyModelUpdate(model);
         console.log("Assembled Model Update Set", params[0]);
         return Umodel;
     } catch (error) {
