@@ -7,8 +7,8 @@ const ShardDB = require("../db");
 module.exports = async (params) => {
     try {
         // let bModel = Blockchain.GetModel([params[0]]);
-        // let model_str = fs.readFileSync(`./models/${params[0]}.json`);
-        let model_str = await BlockAPI.Get(`${params[0]}`);
+        let model_str = fs.readFileSync(`./models/${params[0]}.json`);
+        await BlockAPI.Get(`${params[0]}`);
         
         let model = JSON.parse(model_str);
         const modelHistory = parseInt(process.env.NUM_MODEL_HISTORY);

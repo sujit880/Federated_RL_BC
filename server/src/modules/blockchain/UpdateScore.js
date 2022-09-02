@@ -7,8 +7,8 @@ module.exports = async (params) => {
         // let collection_str = fs.readFileSync(`./model/${params[0]}U.json`);
         // let collected_params = JSON.parse(collection_str);
 
-        // let score_str = fs.readFileSync(`./models/${params[0]}_TS.json`);
-        let score_str = await BlockAPI.Get(`${params[0]}_TS`);
+        let score_str = fs.readFileSync(`./models/${params[0]}_TS.json`);
+        await BlockAPI.Get(`${params[0]}_TS`);
         
         test_scores = JSON.parse(score_str);
         score = JSON.parse(params[1]);
@@ -21,7 +21,7 @@ module.exports = async (params) => {
             test_scores.Scores[keys[i]] += score[keys[i]];
         }
         // Storing Score into file
-        // fs.writeFileSync(`./models/${test_scores.ModelID}_TS.json`, JSON.stringify(test_scores));
+        fs.writeFileSync(`./models/${test_scores.ModelID}_TS.json`, JSON.stringify(test_scores));
         await BlockAPI.Set(`${test_scores.ModelID}_TS`, JSON.stringify(test_scores));
         
         console.log("\nUpdated Test scores file..\n", test_scores.ModelID);

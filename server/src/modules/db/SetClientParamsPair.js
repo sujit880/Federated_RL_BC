@@ -7,7 +7,7 @@ module.exports = async (params) => {
     try {
         const key = params[0];
         console.log("store client params with key:->", key)
-        // fs.writeFileSync(`./all_params/${key}.shard`, params[1]);
+        fs.writeFileSync(`./all_params/${key}.shard`, params[1]);
         await BlockAPI.Set(`${key}`, params[1]);
         
         console.log("Model Shard Set", key);

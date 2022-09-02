@@ -17,15 +17,15 @@ module.exports = async (params) => {
         // let updated_iteration = params[3];
 
         // Read Global model....
-        // let model_str = fs.readFileSync(`./models/${params[0]}.json`);
-        let model_str = await BlockApi.Get(`${params[0]}`);
+        let model_str = fs.readFileSync(`./models/${params[0]}.json`);
+        await BlockApi.Get(`${params[0]}`);
         
         let model = JSON.parse(model_str);
         let iteration = model.Iteration;
 
         // Read Collection params file....
-        // let collection_str = fs.readFileSync(`./models/${params[0]}U.json`);
-        let collection_str = await BlockApi.Get(`${params[0]}U`);
+        let collection_str = fs.readFileSync(`./models/${params[0]}U.json`);
+        await BlockApi.Get(`${params[0]}U`);
         
         let collected_params = JSON.parse(collection_str);
 
@@ -37,7 +37,7 @@ module.exports = async (params) => {
         console.log("Total local collection: ", total_collection, "#Clients: ", collected_params.NClients);
         if (!model.ModelReadLock && total_collection>=collected_params.NClients ){
             model.ModelReadLock = true;
-            // fs.writeFileSync(`./models/${model.ModelID}.json`, JSON.stringify(model));
+            fs.writeFileSync(`./models/${model.ModelID}.json`, JSON.stringify(model));
             await BlockApi.Set(`${model.ModelID}`, JSON.stringify(model))
 
             console.log(model.ModelID,"Model read lock updated", model.ModelReadLock);
@@ -59,7 +59,7 @@ module.exports = async (params) => {
         if (total_collection == collected_params.NClients){
             collected_params.Lock = true;
         }
-        // fs.writeFileSync(`./models/${collected_params.ModelID}U.json`, JSON.stringify(collected_params));
+        fs.writeFileSync(`./models/${collected_params.ModelID}U.json`, JSON.stringify(collected_params));
         await BlockApi.Set(`${collected_params.ModelID}U`, JSON.stringify(collected_params))
 
 
