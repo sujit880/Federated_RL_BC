@@ -21,7 +21,7 @@ ALL_CLIENTS = {}
 AGGREGATION_SCORE = {}
 numberof_appearance = {}
 
-
+round = 0
 
 while True:
     if modman.get_update_lock(URL, ALIAS):
@@ -32,31 +32,41 @@ while True:
         for c_key in keys:
             params, score = all_params_wscore[c_key]
             key, score = ts.Test_Params(params=params, client_key=c_key)
+            if c_key not in AGGREGATION_SCORE:
+                print("\nGot update from new clients.............\n")
+                AGGREGATION_SCORE[c_key] = score
             # all_params.append([json.loads(params),score])
-            mean_scores[key] = ts.Test_Params(params=params, client_key=c_key)
-        global_score = ts.Test_Params(params=global_params, client_key="global")
+            mean_scores[key] = score
+        _, global_score = ts.Test_Params(params=global_params, client_key="global")
         # honest, malicious_client = vf.verifier(mean_scores=mean_scores)
-        honest, malicious_client = vf.verifier_wg(mean_scores=mean_scores, global_score=global_score)
+        honest, malicious_client = vf.verifier_wg(Scores=mean_scores, global_score=global_score)
         total_aggregation_weight = 0.0
         if len(honest)>0:
+            print(f'found honest clients......')
             for client_key in honest:
                 total_aggregation_weight += AGGREGATION_SCORE[client_key]/len(honest)
             for client_key in honest:
                 aggregation_weight = mean_scores[client_key]/(total_aggregation_weight+0.0_00_00_00_001)
+                print(f'Calculated aggregation weight: ', aggregation_weight)
+                print(f'---->1 : {AGGREGATION_SCORE[c_key]}')
                 AGGREGATION_SCORE[client_key] += aggregation_weight 
+                print(f'---->2 : {AGGREGATION_SCORE[c_key]}')
                 params, score = all_params_wscore[client_key]
-                all_val_params.append([params,mean_scores[client_key]])
+                all_val_params.append([params,AGGREGATION_SCORE[client_key]])
+                print("Valid Params: ", AGGREGATION_SCORE[client_key])
 
             ##############################
             # Aggregate all valid params  
             #############################
-            print("Number of honest client", len(honest))  
+            print("Number of honest client", len(honest)) 
+             
             average_params=works.Federated_average(all_val_params)
             # print("\n params type: ", type(average_params))
             # print("Aggregated Params:->\n", average_params)
             modman.send_global_model_update(URL,ALIAS, modman.convert_tensor_to_list(average_params))
             print("Update Complete . . . .")
         else:
-            modman.send_global_model_update(URL,ALIAS, modman.convert_tensor_to_list(global_params))
+            print(f'no honest clients detected........')
+            modman.send_global_model_update(URL,ALIAS, global_params)
 
     sleep(0.2)

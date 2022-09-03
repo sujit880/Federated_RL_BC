@@ -39,7 +39,7 @@ def verifier_wg(Scores, global_score):
     # sigma=0.85 #Hyperparameter to verify score
     malicious = []
     honest=[]
-    for client_key in keys:
+    for client_key in Scores:
         if Scores[client_key] < (global_score -(global_score *(1 -sigma))):
             print("Detect malicious client: ", client_key)
             malicious.append(client_key)

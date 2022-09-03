@@ -8,7 +8,7 @@ import ipfshttpclient as ipfs
 ## Create IPFS Client
 client = ipfs.connect("/ip4/172.16.26.15/tcp/5001/http")
 
-
+try_cnt = 0
 
 def convert_list_to_tensor(params: dict) -> dict:
     params_ = {}
@@ -52,7 +52,7 @@ def get_client_params(url: str, model_name: str):
         value1 = client.get_json(x)
         client_params =json.loads(value1["params"])
         # print("Params:", value)
-        clients_params[x]=[client_params,clients[x]]
+        clients_params[clients[x][1]]=[client_params,clients[x][0]] #clients[x][1] -> clients_key
     # global_params = client.cat(data["global_params"]) 
     value1 = client.get_json(data["global_params"])
     global_params =json.loads(value1["params"])
@@ -93,17 +93,26 @@ def send_global_model_update(url: str, model_name: str, params: dict):
 
 # Fetch Model Lock Status  
 def get_update_lock(url: str, model_name: str):
-    
-    r = requests.get(url=url + 'getUlock/'+model_name)
-    if r.status_code != 200:
-        print("Server Error: Could not fetch Lock Status.\nQuitting...")
-        quit()
+    global try_cnt
+    try:
+        r = requests.get(url=url + 'getUlock/'+model_name)
+        if r.status_code != 200:
+            print("Server Error: Could not fetch Lock Status.\nQuitting...")
+            # quit()
 
-    # Extract data in json format
-    data = r.json()
-    print("data->", data)
-    print("Lock data:->", data['LockStatus'])
+        # Extract data in json format
+        data = r.json()
+        print("data->", data)
+        print("Lock data:->", data['LockStatus'])
+        try_cnt = 0
+        return data['LockStatus'] 
+    except:
+        try_cnt += 1
+        print("Server error try again after 2 sec.")
+        if try_cnt >20:
+            print("Couldn't connect to server quiting")
+            quit()
+        sleep(2)
 
-    return data['LockStatus'] 
 
 

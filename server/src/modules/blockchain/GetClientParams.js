@@ -16,7 +16,7 @@ module.exports = (ModelID) => {
         for (let i=0; i<client_keys.length; i++){
             if(test_score.Scores[client_keys[i]] === undefined) throw "Error with clients key!!"            
             // params = SharDb.GetClientParamsPair(client_keys[i]);
-            all_params_wscore[collected_params.AllParams[client_keys[i]]]=test_score.Scores[client_keys[i]];
+            all_params_wscore[collected_params.AllParams[client_keys[i]]]=[test_score.Scores[client_keys[i]], client_keys[i]];
         }
         console.log("Get all client params for aggregation", collected_params.ModelID);
         return all_params_wscore;
