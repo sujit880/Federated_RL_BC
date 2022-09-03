@@ -10,6 +10,7 @@ from time import sleep
 import matplotlib.pyplot as plt
 import csv
 import datetime
+from os import getpid
 
 now = datetime.datetime.now
 
@@ -92,6 +93,7 @@ while True:
 
     sleep(0.2)
 stamp = now()
+log_dir = "./logs/"
 newfilePath = f'{log_dir+str(getpid())+":Finished"+ALIAS}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}_finished'
 rows = zip(clients_verify_stats.values())
 with open(newfilePath, "w") as f:

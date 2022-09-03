@@ -1,4 +1,5 @@
 import numpy as np
+import random
 sigma=0.85 #Hyperparameter to verify score
 # Scores = {}
 # Scores['key1']= 125
@@ -16,7 +17,13 @@ sigma=0.85 #Hyperparameter to verify score
 ## Verify If Client Is malicious
 
 def verifier(Scores):
-    
+    rand = random.random()
+    if rand<0.3: 
+        sigma = 0.3
+    elif rand>0.89:
+        sigma = 0.9
+    else:
+        sigma = 0.1 + rand
     keys = list(Scores.keys())
     values = list(Scores.values())
     print("Keys: ", keys, "Values: ", values)
