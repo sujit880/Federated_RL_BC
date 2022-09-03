@@ -132,7 +132,7 @@ def set_complete(url: str, Id: str):
     }
     }
     # Send GET request
-    r = requests.get(url=url+'set_complete/'+Id, json=body)
+    r = requests.post(url=url+'set_complete/'+Id, json=body)
     print("status", r.status_code)
     # Extract data in json format
     data = r.json()
