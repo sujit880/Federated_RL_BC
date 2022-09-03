@@ -9,6 +9,7 @@ const GetParamList = require("./GetParamList");
 const GetULock = require("./GetULock");
 const SetModel = require("./SetModel");
 const UpdateScore = require("./UpdateScore");
+const SetComplete = require("./SetComplete");
 
 module.exports = {
     ApplyModelUpdate,
@@ -21,5 +22,6 @@ module.exports = {
     GetULock,
     SetModel,
     UpdateScore,
+    SetComplete,
 
 };

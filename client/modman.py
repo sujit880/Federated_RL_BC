@@ -71,7 +71,7 @@ def get_model_lock(url: str, Id: str) -> bool:
     print("status", r.status_code) 
     if r.status_code != 200:
         print("Server Error: Could not fetch Lock Status.\nTrying to set global params...")
-        return False   # implies cant read the data
+        return [False,False]   # implies cant read the data
     # Extract data in json format
     data = r.json()
     

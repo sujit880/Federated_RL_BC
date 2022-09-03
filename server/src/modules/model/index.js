@@ -7,6 +7,7 @@ const GetClientParams = require("./GetClientParams");
 const PostParams = require("./PostParams");
 const GetLock = require("./GetLock");
 const UpdateScore = require("./UpdateScore");
+const SetComplete = require("./SetComplete");
 
 module.exports = {
     SetModel,
@@ -18,5 +19,5 @@ module.exports = {
     PostParams,
     GetLock,
     UpdateScore,
-
+    SetComplete
 };
