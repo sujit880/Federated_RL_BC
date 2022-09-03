@@ -12,6 +12,7 @@ module.exports = (params) => {
             ModelUpdateCount: -1,
             ModelReadLock: false,
             ModelUpdateLock: true,  // true means can't update
+            ModelComplete: false,
         };
 
         fs.writeFileSync(`./models/${model.ModelID}.json`, JSON.stringify(model));
@@ -25,7 +26,7 @@ module.exports = (params) => {
             AllParams: {},
             AllClients: [],
             Lock: false,  // false means active to collecting model params
-
+            ModelComplete: false,
         };
         // collectedparams.AllClients.push("hello")
         fs.writeFileSync(`./models/${collectedparams.ModelID}U.json`, JSON.stringify(collectedparams));

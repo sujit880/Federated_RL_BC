@@ -6,7 +6,7 @@ module.exports = (ModelID) => {
         let umodel = JSON.parse(umodstr);
         console.log("Model Lock Status Get", umodel.ModelID);
         console.log("update Lock->", umodel.Lock);
-        return umodel.Lock;
+        return [umodel.Lock, umodel.ModelComplete];
     } catch (error) {
         console.log("Error occured");
         console.error(error);

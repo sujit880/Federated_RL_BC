@@ -84,6 +84,22 @@ router.post("/api/model/set/", async (req, res) => {
     }
 });
 
+router.set("/api/model/set_complete/:id", async (req, res) => {
+    try {
+        
+        console.log("got set complete request from client ip: ",req.ip, "pid: ", req.body.data.pid);
+        await ModelContract.SetComplete([req.params.id, req.body.data.pid, req.ip]);
+
+        console.log("*******************Finishing model training**********************\n")
+        if (!data) throw "Error In Parent Methods.";
+
+        res.status(200).send({ message: "Set Complete Successful!" });
+    } catch (error) {
+        console.log("exception occured in fetch param");
+        console.error(error);
+        res.status(404).send({ message: "Model NOT found!" });
+    } });
+
 router.post("/api/model/collect/", async (req, res) => {
     try {
         console.log("Clients send local params.. \n Client ip: ", req.ip, "Client pid: ", req.body.data.pid);

@@ -120,11 +120,24 @@ def send_model_params(url: str, params: dict, lr: float, Id: str):
 
     # Extract data in json format
     data = r.json()
-
     print('data reply', data)
 
     print("data-->", data['Iteration'])
     return data['ModelParams'], data['NPush'], data['ModelID'], data['Iteration']
+
+def set_complete(url: str, Id: str):
+    body = {'data':{
+        'id' : Id,
+        'pid': getpid()
+    }
+    }
+    # Send GET request
+    r = requests.get(url=url+'set_complete/'+Id, json=body)
+    print("status", r.status_code)
+    # Extract data in json format
+    data = r.json()
+    print('data reply', data)
+
 # Convert State Dict List to Tensor
 def convert_list_to_tensor(params: dict) -> dict:
     params_ = {}
