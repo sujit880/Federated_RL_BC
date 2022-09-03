@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import csv
 import datetime
 from os import getpid
+import os
 
 now = datetime.datetime.now
 
@@ -93,10 +94,12 @@ while True:
 
     sleep(0.2)
 stamp = now()
-log_dir = "./logs/"
+log_dir = './logs/'
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
 newfilePath = f'{log_dir+str(getpid())+":Finished"+ALIAS}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}_finished'
 rows = zip(clients_verify_stats.values())
-with open(newfilePath, "w") as f:
+with open(newfilePath+".csv", "w") as f:
     writer = csv.writer(f)
     for row in rows:
         writer.writerow(row)
