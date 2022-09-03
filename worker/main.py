@@ -35,7 +35,8 @@ while True:
             # all_params.append([json.loads(params),score])
             mean_scores[key] = ts.Test_Params(params=params, client_key=c_key)
         global_score = ts.Test_Params(params=global_params, client_key="global")
-        honest, malicious_client = vf.verifier(mean_scores=mean_scores)
+        # honest, malicious_client = vf.verifier(mean_scores=mean_scores)
+        honest, malicious_client = vf.verifier_wg(mean_scores=mean_scores, global_score=global_score)
         total_aggregation_weight = 0.0
         if len(honest)>0:
             for client_key in honest:

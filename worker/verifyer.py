@@ -1,7 +1,6 @@
 import numpy as np
 sigma=0.85 #Hyperparameter to verify score
 # Scores = {}
-
 # Scores['key1']= 125
 # Scores['key2']= 170
 # Scores['key3']= 180
@@ -9,6 +8,10 @@ sigma=0.85 #Hyperparameter to verify score
 # Scores['key5']= 125
 # Scores['key6']= 125
 # Scores['key7']= 125
+
+
+#### Compare global round versus aggregation weight or contribution.
+
 
 ## Verify If Client Is malicious
 
