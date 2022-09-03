@@ -84,7 +84,7 @@ router.post("/api/model/set/", async (req, res) => {
     }
 });
 
-router.set("/api/model/set_complete/:id", async (req, res) => {
+router.post("/api/model/set_complete/:id", async (req, res) => {
     try {
         
         console.log("got set complete request from client ip: ",req.ip, "pid: ", req.body.data.pid);

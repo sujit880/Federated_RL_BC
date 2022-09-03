@@ -104,6 +104,6 @@ for c_key in clients_verify_stats:
     plt.ylabel('Aggregation Contribution')
     plt.xlabel('Global rounds')
     plt.savefig(f'./logs/{client_key}_{ALIAS}.png')
-    plt.title(f'{client_key}'s Contribution graph !')
+    plt.title(f'{client_key}\'s Contribution graph !')
     plt.show()
     plt.close()
