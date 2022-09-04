@@ -104,11 +104,21 @@ with open(newfilePath+".csv", "w") as f:
     for row in rows:
         writer.writerow(row)
 for c_key in clients_verify_stats:
-    y,x = clients_verify_stats[client_key]
+    x = dict1[key][1]
+    y = dict1[key][0]
     plt.plot(x, y)
     plt.ylabel('Aggregation Contribution')
     plt.xlabel('Global rounds')
-    plt.savefig(f'./logs/{client_key}_{ALIAS}.png')
-    plt.title(f'{client_key}\'s Contribution graph !')
+    plt.savefig(f'{log_dir+key}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}.png')
+    # plt.title(f' Contribution graph')
+    plt.grid()
     plt.show()
     plt.close()
+
+    print(f'********************* logging:{c_key} *********************')
+    newfilePath = f'{log_dir+client_key+str(getpid())+":Finished_contri"+ALIAS}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}_finished'
+    with open(f"{newfilePath}.csv", "w") as f:
+        writer = csv.writer(f)
+        writer.writerow(["round","contri"])
+        for i in range(len(x)):
+            writer.writerow([x[i],y[i]])
