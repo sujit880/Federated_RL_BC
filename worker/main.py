@@ -63,7 +63,7 @@ while True:
             print(f'found honest clients......')
             for client_key in honest:
                 aggregation_ratio = 1
-                if client_key in clients_verify_stats:
+                if client_key in clients_verify_stats and client_key in clients_round:
                     aggregation_ratio = (len(clients_round[c_key])/len(clients_verify_stats[client_key][1]))
                 aggregation_weight = mean_scores[client_key]/(AGGREGATION_SCORE[client_key] +0.0_00_00_00_001) * aggregation_ratio 
                 print(f'Calculated aggregation weight: ', aggregation_weight)
@@ -72,7 +72,8 @@ while True:
                 if client_key not in clients_verify_stats: # logging clients reports
                     clients_verify_stats[client_key]=[[aggregation_weight],[round]]                    
                 else:
-                    clients_verify_stats[client_key].append([[aggregation_weight],[round]])
+                    clients_verify_stats[client_key][0].append(aggregation_weight)
+                    clients_verify_stats[client_key][1].append(round)
                 print(f'---->2 : {AGGREGATION_SCORE[c_key]}')
                 params, score = all_params_wscore[client_key]
                 all_val_params.append([params,AGGREGATION_SCORE[client_key]])
@@ -93,31 +94,33 @@ while True:
             modman.send_global_model_update(URL,ALIAS, global_params)
 
     sleep(0.2)
+print(">>>>>>>>>>>>>>>>>>Training Finished\n Start Logging..............")
 stamp = now()
 log_dir = './logs/'
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
-newfilePath = f'{log_dir+str(getpid())+":Finished"+ALIAS}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}_finished'
-rows = zip(clients_verify_stats.values())
-with open(newfilePath+".csv", "w") as f:
-    writer = csv.writer(f)
-    for row in rows:
-        writer.writerow(row)
+    print(f'path not exist!!!!!!!!!!!!!')
+else: print(f'path exist')
+print(f"clients verify stats:", clients_verify_stats)
 for c_key in clients_verify_stats:
-    x = dict1[key][1]
-    y = dict1[key][0]
+    print(f'>>>>>>>>>>>>>>>1')
+    x = clients_verify_stats[c_key][1]
+    y = clients_verify_stats[c_key][0]
+    print(f'logging for client {c_key}............')
     plt.plot(x, y)
     plt.ylabel('Aggregation Contribution')
     plt.xlabel('Global rounds')
-    plt.savefig(f'{log_dir+key}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}.png')
-    # plt.title(f' Contribution graph')
     plt.grid()
-    plt.show()
+    plt.savefig(f'{log_dir}client_{c_key[4:]}_{stamp.strftime("%d_%m-%H_%M")}.png')
+    # plt.title(f' Contribution graph')
+    # plt.show()
     plt.close()
 
     print(f'********************* logging:{c_key} *********************')
-    newfilePath = f'{log_dir+client_key+str(getpid())+":Finished_contri"+ALIAS}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}_finished'
+    newfilePath = f'{log_dir+"Finished_contri_"+ALIAS}_C_{c_key[4:]}_{stamp.strftime("%d_%m-%H_%M")}_finished'
+    print(f'>>>>>>>>>>>>>>>>>>>>>>>>2')
     with open(f"{newfilePath}.csv", "w") as f:
+        print(f'>>>>>>>>>>>>>>>3')
         writer = csv.writer(f)
         writer.writerow(["round","contri"])
         for i in range(len(x)):
