@@ -47,10 +47,10 @@ ip_address = "172.16.26.15"  # server macine ip address
 # URL = "http://"+ip_address+":5500/api/model/"
 # URL = "http://localhost:5500/api/model/"
 
-URL = "http://localhost:3000/api/model/"
+URL = "http://localhost:3001/api/model/"
 
 # ip_address = "172.16.27.168"
-# URL = "http://"+ip_address+":3000/api/model/"
+# URL = "http://"+ip_address+":3001/api/model/"
 
 # ..
 

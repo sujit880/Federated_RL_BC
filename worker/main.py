@@ -19,7 +19,7 @@ now = datetime.datetime.now
 ALIAS = 'experiment_01'
 
 # API endpoint
-URL = "http://localhost:3000/api/model/"
+URL = "http://localhost:3001/api/model/"
 
 # URL = "http://localhost:5500/api/model/"
 

@@ -34,7 +34,7 @@ ALIAS = 'experiment_01'
 ENV_NAME = 'CartPole-v0'
 
 # API endpoint
-URL = "http://localhost:3000/api/model/"
+URL = "http://localhost:3001/api/model/"
 
 
 class INFRA:
