@@ -66,7 +66,7 @@ while True:
             agr_sc = {}
             for client_key in honest:
                 aggregation_ratio = 1
-                if client_key in clients_verify_stats and client_key in clients_round:
+                if client_key in clients_verify_stats and client_key in clients_round and client_key in clients_round:
                     res =[x for x, val in enumerate(clients_verify_stats[client_key][1]) if val != 0] #index list of non zero elements
                     aggregation_ratio = (len(clients_round[c_key])/len(res)) #participation ratio
                 aggregation_weight = mean_scores[client_key]/(AGGREGATION_SCORE[client_key] +0.0_00_00_00_001) * aggregation_ratio 
@@ -124,10 +124,10 @@ for c_key in clients_verify_stats:
     plt.plot(x, y)
     plt.ylabel('Aggregation Contribution')
     plt.xlabel('Global rounds')
-    plt.savefig(f'{log_dir}client_{c_key[-4:]}_{stamp.strftime("%d_%m-%H_%M")}.png')
-    # plt.title(f' Contribution graph')
     plt.grid()
-    plt.show()
+    plt.savefig(f'{log_dir}client_{c_key[4:]}_{stamp.strftime("%d_%m-%H_%M")}.png')
+    # plt.title(f' Contribution graph')
+    # plt.show()
     plt.close()
 
     print(f'********************* logging:{c_key} *********************')
