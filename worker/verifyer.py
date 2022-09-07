@@ -53,6 +53,8 @@ def verifier_wg(Scores, global_score):
         else:
             print("Detected honest client")
             honest.append(client_key)
+    if len(honest)==0:
+       honest,malicious = verifier(Scores=Scores)
     return honest,malicious
 
 # print(verifier(Scores=Scores))

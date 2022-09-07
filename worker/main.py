@@ -30,7 +30,7 @@ numberof_appearance = {}
 round = 0
 clients_verify_stats = {}
 clients_round = {}
-
+global_reward = [[],[]]
 COMPLETE = False
 
 while True:
@@ -56,27 +56,42 @@ while True:
             # all_params.append([json.loads(params),score])
             mean_scores[key] = score
         _, global_score = ts.Test_Params(params=global_params, client_key="global")
+        global_reward[0].append(global_score)
+        global_reward[1].append(round)
         # honest, malicious_client = vf.verifier(mean_scores=mean_scores)
         honest, malicious_client = vf.verifier_wg(Scores=mean_scores, global_score=global_score)
         total_aggregation_weight = 0.0
         if len(honest)>0:
             print(f'found honest clients......')
+            agr_sc = {}
             for client_key in honest:
                 aggregation_ratio = 1
-                if client_key in clients_verify_stats:
-                    aggregation_ratio = (len(clients_round[c_key])/len(clients_verify_stats[client_key][1]))
+                if client_key in clients_verify_stats and client_key in clients_round:
+                    res =[x for x, val in enumerate(clients_verify_stats[client_key][1]) if val != 0] #index list of non zero elements
+                    aggregation_ratio = (len(clients_round[c_key])/len(res)) #participation ratio
                 aggregation_weight = mean_scores[client_key]/(AGGREGATION_SCORE[client_key] +0.0_00_00_00_001) * aggregation_ratio 
                 print(f'Calculated aggregation weight: ', aggregation_weight)
                 print(f'---->1 : {AGGREGATION_SCORE[c_key]}')
                 AGGREGATION_SCORE[client_key] = (aggregation_weight + AGGREGATION_SCORE[client_key])/2.0
-                if client_key not in clients_verify_stats: # logging clients reports
-                    clients_verify_stats[client_key]=[[aggregation_weight],[round]]                    
-                else:
-                    clients_verify_stats[client_key].append([[aggregation_weight],[round]])
+                agr_sc[client_key] = aggregation_weight
+                
                 print(f'---->2 : {AGGREGATION_SCORE[c_key]}')
                 params, score = all_params_wscore[client_key]
                 all_val_params.append([params,AGGREGATION_SCORE[client_key]])
                 print("Valid Params: ", AGGREGATION_SCORE[client_key])
+            for c_key in agr_sc:
+                aggregation_contribution = agr_sc[c_key]/ np.sum(np.array(list(agr_sc.values())))
+                if c_key not in clients_verify_stats: # logging clients reports
+                    clients_verify_stats[c_key]=[[aggregation_contribution],[round]]                    
+                else:
+                    clients_verify_stats[c_key][0].append(aggregation_contribution)
+                    clients_verify_stats[c_key][1].append(round)
+        for c_key in malicious_client:
+            if client_key in clients_verify_stats:# logging clients reports
+                clients_verify_stats[c_key]=[[0],[round]]                    
+            else:
+                clients_verify_stats[c_key][0].append(0)
+                clients_verify_stats[c_key][1].append(round)
 
             ##############################
             # Aggregate all valid params  
@@ -93,31 +108,55 @@ while True:
             modman.send_global_model_update(URL,ALIAS, global_params)
 
     sleep(0.2)
+print(">>>>>>>>>>>>>>>>>>Training Finished\n Start Logging..............")
 stamp = now()
 log_dir = './logs/'
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
-newfilePath = f'{log_dir+str(getpid())+":Finished"+ALIAS}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}_finished'
-rows = zip(clients_verify_stats.values())
-with open(newfilePath+".csv", "w") as f:
-    writer = csv.writer(f)
-    for row in rows:
-        writer.writerow(row)
+    print(f'path not exist!!!!!!!!!!!!!')
+else: print(f'path exist')
+print(f"clients verify stats:", clients_verify_stats)
 for c_key in clients_verify_stats:
-    x = dict1[key][1]
-    y = dict1[key][0]
+    print(f'>>>>>>>>>>>>>>>1')
+    x = clients_verify_stats[c_key][1]
+    y = clients_verify_stats[c_key][0]
+    print(f'logging for client {c_key}............')
     plt.plot(x, y)
     plt.ylabel('Aggregation Contribution')
     plt.xlabel('Global rounds')
-    plt.savefig(f'{log_dir+key}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}.png')
+    plt.savefig(f'{log_dir}client_{c_key[-4:]}_{stamp.strftime("%d_%m-%H_%M")}.png')
     # plt.title(f' Contribution graph')
     plt.grid()
     plt.show()
     plt.close()
 
     print(f'********************* logging:{c_key} *********************')
-    newfilePath = f'{log_dir+client_key+str(getpid())+":Finished_contri"+ALIAS}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}_finished'
+    newfilePath = f'{log_dir+"Finished_contri_"+ALIAS}_C_{c_key[-4:]}_{stamp.strftime("%d_%m-%H_%M")}_finished'
+    print(f'>>>>>>>>>>>>>>>>>>>>>>>>2')
     with open(f"{newfilePath}.csv", "w") as f:
+        print(f'>>>>>>>>>>>>>>>3')
+        writer = csv.writer(f)
+        writer.writerow(["round","contri"])
+        for i in range(len(x)):
+            writer.writerow([x[i],y[i]])
+
+global_fig = True
+if global_fig:
+    print(f'logging for client {c_key}............')
+    y,x = global_reward
+    plt.plot(x, y)
+    plt.ylabel('Mean rewards')
+    plt.xlabel('Global rounds')
+    plt.savefig(f'{log_dir}global_{stamp.strftime("%d_%m-%H_%M")}.png')
+    # plt.title(f' Contribution graph')
+    plt.grid()
+    plt.show()
+    plt.close()
+    print(f'********************* logging:global *********************')
+    newfilePath = f'{log_dir+"Global"+ALIAS}_{stamp.strftime("%d_%m-%H_%M")}_finished'
+    print(f'>>>>>>>>>>>>>>>>>>>>>>>>2')
+    with open(f"{newfilePath}.csv", "w") as f:
+        print(f'>>>>>>>>>>>>>>>3')
         writer = csv.writer(f)
         writer.writerow(["round","contri"])
         for i in range(len(x)):

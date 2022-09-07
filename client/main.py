@@ -79,7 +79,7 @@ PIE_PARAMS.TUF = 4
 PIE_PARAMS.DEV = 'cpu'
 
 TRAIN_PARAMS = INFRA()
-TRAIN_PARAMS.EPOCHS = 5_00_000
+TRAIN_PARAMS.EPOCHS = 5_00#_000
 TRAIN_PARAMS.MOVES = 10
 TRAIN_PARAMS.EPISODIC = False
 TRAIN_PARAMS.MIN_MEM = 30
@@ -249,7 +249,7 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
         log_dir = './logs/'
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
-        sav_instance_path = f'{log_dir+str(getpid())+":"+ENV_NAME}_{stpc.strftime("%d_%m_%Y-%H_%M_%S")}'
+        sav_instance_path = f'{log_dir}Finished{ENV_NAME}_{epoch}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}'
         with open(sav_instance_path +'.csv', 'w' ) as f:
             f.write(LOG_CSV)
 
@@ -331,7 +331,7 @@ modman.set_complete(URL, ALIAS)
 log_dir = './logs/'
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
-sav_instance_path = f'{log_dir+str(getpid())+":Finished"+ENV_NAME}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}_finished'
+sav_instance_path = f'{log_dir}Finished{ENV_NAME}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}'
 with open(sav_instance_path +'.csv', 'w' ) as f:
     f.write(LOG_CSV)
 
