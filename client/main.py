@@ -79,7 +79,7 @@ PIE_PARAMS.TUF = 4
 PIE_PARAMS.DEV = 'cpu'
 
 TRAIN_PARAMS = INFRA()
-TRAIN_PARAMS.EPOCHS = 5_00#_000
+TRAIN_PARAMS.EPOCHS = 5_00_000
 TRAIN_PARAMS.MOVES = 10
 TRAIN_PARAMS.EPISODIC = False
 TRAIN_PARAMS.MIN_MEM = 30
@@ -290,6 +290,15 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
 
                 # Get Updated Model Params from Server
                 global_params, n_push,_, is_available = modman.fetch_params(URL, ALIAS)
+                rety_cnt = 0
+                while not is_available:
+                    if rety_cnt==10:
+                        print("Maximum trying limits exceeded continue training with local parameters")
+                        global_params = modman.convert_tensor_to_list(pie.Q.state_dict())
+                        break
+                    print(f"Error while fetching global params, retry after 1 sec. {rety_cnt}/10")
+                    sleep(1)
+                    global_params, n_push,_, is_available = modman.fetch_params(URL, ALIAS)
                 n_steps=n_push
                 # print("Params->", global_params)
                 pie.Q.load_state_dict(modman.convert_list_to_tensor(global_params))
