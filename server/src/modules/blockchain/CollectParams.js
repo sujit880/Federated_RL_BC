@@ -1,6 +1,8 @@
 const fs = require("fs");
 const md5 = require("md5");
 const BlockApi = require("../block-api");
+const d = new Date();
+const block_latency_log = [];
 
 module.exports = async (params) => {
     try {
@@ -37,8 +39,13 @@ module.exports = async (params) => {
         console.log("Total local collection: ", total_collection, "#Clients: ", collected_params.NClients);
         if (!model.ModelReadLock && total_collection >= collected_params.NClients) {
             model.ModelReadLock = true;
-            fs.writeFileSync(`./models/${model.ModelID}.json`, JSON.stringify(model));
+            fs.writeFileSync(`./models/${model.ModelID}.json`, JSON.stringify(model));            
+            let time1 = d.getMilliseconds();
             await BlockApi.Set(`${model.ModelID}`, JSON.stringify(model));
+            console.log("Storing data in blockchain");
+            let time2 = d.getMilliseconds();
+            block_latency_log.push(time2-time1);
+            fs.writeFileSync(`./models/${model.ModelID}latency_set.json`, JSON.stringify(block_latency_log));
 
             console.log(model.ModelID, "Model read lock updated", model.ModelReadLock);
         }
@@ -59,8 +66,12 @@ module.exports = async (params) => {
             collected_params.Lock = true;
         }
         fs.writeFileSync(`./models/${collected_params.ModelID}U.json`, JSON.stringify(collected_params));
+        let time1 = d.getMilliseconds();
         await BlockApi.Set(`${collected_params.ModelID}U`, JSON.stringify(collected_params));
-
+        console.log("Storing local params data in blockchain");
+        let time2 = d.getMilliseconds();
+        block_latency_log.push(time2-time1);
+        fs.writeFileSync(`./models/${model.ModelID}latency_set.json`, JSON.stringify(block_latency_log));
         console.log("Created File for collected params", collected_params.ModelID);
         return collected_params;
     } catch (error) {

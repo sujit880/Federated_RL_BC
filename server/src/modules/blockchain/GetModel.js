@@ -1,7 +1,8 @@
 const fs = require("fs");
 const md5 = require("md5");
 const BlockAPI = require("../block-api");
-
+const d = new Date();
+const block_latency_log = [];
 module.exports = async (params) => {
     try {
         client_key = params[2] + params[1];
@@ -12,12 +13,19 @@ module.exports = async (params) => {
         let model = JSON.parse(model_str);
 
         console.log(model);
+        latency_log = {
+            log: null,
+        }
 
         console.log("Model_params_get", model.ModelID);
 
         let collection_str = fs.readFileSync(`./models/${model.ModelID}U.json`);
+        time1 = d.getMilliseconds();
         await BlockAPI.Get(`${model.ModelID}U`);
-
+        console.log("fetching global model from blockchain");
+        time2 = d.getMilliseconds();
+        block_latency_log.push(time2-time1);
+        fs.writeFileSync(`./models/${model.ModelID}latency_fetch.json`, JSON.stringify(block_latency_log));
         let collected_params = JSON.parse(collection_str);
         iteration = collected_params.Iteration;
         console.log("check-B-GetModel1 after iteratio");
