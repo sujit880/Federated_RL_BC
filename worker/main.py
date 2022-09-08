@@ -101,7 +101,7 @@ while True:
             print(f'no honest clients detected........')
             modman.send_global_model_update(URL,ALIAS, global_params)
         for c_key in malicious_client:
-            if client_key not in clients_verify_stats:# logging clients reports
+            if c_key not in clients_verify_stats:# logging clients reports
                 clients_verify_stats[c_key]=[[0],[round]]                    
             else:
                 clients_verify_stats[c_key][0].append(0)
