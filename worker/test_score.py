@@ -137,11 +137,3 @@ def Test_Params(params, client_key):
     P('MAX Reward:', np.max(effs))
     P('MIN Reward:', np.min(effs))
     return client_key, np.mean(effs);
-    # fig, ax = plt.subplots(2, 1, figsize=(12, 10))
-    # ax[0].plot(effs, color='green')
-    # ax[0].set_ylabel('Reward')
-    # ax[1].hist(effs, range=(0, 200.1), bins=25, color='green')
-    # ax[1].set_xlabel('Reward Distribution')
-    # plt.savefig(f'./logs/{ALIAS}.png')
-    # F(fig, 'val_CERF')
-    # plt.close()

@@ -1,16 +1,12 @@
 const fs = require("fs");
 
-const BlockAPI = require("../block-api");
-
-module.exports = async (ModelID) => {
+module.exports = (ModelID) => {
     try {
         let umodstr = fs.readFileSync(`./models/${ModelID}U.json`);
-        await BlockAPI.Get(`${ModelID}U`);
-
         let umodel = JSON.parse(umodstr);
         console.log("Model Lock Status Get", umodel.ModelID);
         console.log("update Lock->", umodel.Lock);
-        return umodel.Lock;
+        return [umodel.Lock, umodel.ModelComplete];
     } catch (error) {
         console.log("Error occured");
         console.error(error);

@@ -79,7 +79,7 @@ PIE_PARAMS.TUF = 4
 PIE_PARAMS.DEV = 'cpu'
 
 TRAIN_PARAMS = INFRA()
-TRAIN_PARAMS.EPOCHS = 50000
+TRAIN_PARAMS.EPOCHS = 5_00_000
 TRAIN_PARAMS.MOVES = 10
 TRAIN_PARAMS.EPISODIC = False
 TRAIN_PARAMS.MIN_MEM = 30
@@ -166,10 +166,14 @@ LOG_CSV = 'epoch,reward,tr,up\n'
 # reply = modman.send_model_params(
 #         URL, modman.convert_tensor_to_list(pie.Q.state_dict()), PIE_PARAMS.LR, ALIAS)
 # print("Response:",reply)
-
-while modman.get_model_lock(URL, ALIAS):  # wait if model updation is going on
-    print("Waiting for Model Lock Release1.")
-    sleep(0.02)
+COMPLETE = False
+while True: 
+    lock_status = modman.get_model_lock(URL, ALIAS) # wait if model updation is going on
+    if lock_status[1]: COMPLETE = True
+    if lock_status[0]:
+        print("Waiting for Model Lock Release1.")
+        sleep(0.02)
+    else: break
 print("before fetch params")
 global_params, n_push, log_id, is_available = modman.fetch_params(URL, ALIAS)
 # print("global params", global_params)
@@ -211,8 +215,8 @@ log_testing = log_id+ 'testing_logs.csv'
 
 path1 = modman.increment_path(path=log_path+log_file,exist_ok=False,mkdir=True)
 path2 = modman.increment_path(path=log_path+log_testing,exist_ok=False,mkdir=True)
-modman.csv_writer(path=path1,data=[[f'Log Data for Client IPAddres: {IPAddr} Pid: {getpid()}']])
-modman.csv_writer(path=path2,data=[[f'Log Data for Client IPAddres: {IPAddr} Pid: {getpid()}']])
+#modman.csv_writer(path=path1,data=[[f'Log Data for Client IPAddres: {IPAddr} Pid: {getpid()}']])
+#modman.csv_writer(path=path2,data=[[f'Log Data for Client IPAddres: {IPAddr} Pid: {getpid()}']])
 
 ##############################################
 # Training
@@ -237,14 +241,15 @@ txp.reset(clear_mem=True, reset_epsilon=True)
 
 lt1=now() # setting initial learning time
 for epoch in range(0, TRAIN_PARAMS.EPOCHS):
+    if COMPLETE: break  ##Stop training if model converged or reached maximum epochs in any clients.
     stpc = now() # start time for epoch
     lt1 +=(now()-lt1)  # time at epoch start
 
-    if((epoch+1)% 2000 == 0):
-        log_dir = './logs_csv/'
+    if((epoch+1)% 1_000 == 0):
+        log_dir = './logs/'
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
-        sav_instance_path = f'{log_dir+ENV_NAME}_{stpc.strftime("%d_%m_%Y-%H_%M_%S")}'
+        sav_instance_path = f'{log_dir}Finished{ENV_NAME}_{epoch}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}'
         with open(sav_instance_path +'.csv', 'w' ) as f:
             f.write(LOG_CSV)
 
@@ -275,12 +280,25 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
                 log_data.append(reply)
                 
                 # Wait for Model Lock to get Released
-                while modman.get_model_lock(URL, ALIAS):
-                    print("Waiting for Model Lock Release2.")
-                    sleep(0.05)
+                while True: 
+                    lock_status = modman.get_model_lock(URL, ALIAS) # wait if model updation is going on
+                    if lock_status[1]: COMPLETE = True
+                    if lock_status[0]:
+                        print("Waiting for Model Lock Release1.")
+                        sleep(0.02)
+                    else: break
 
                 # Get Updated Model Params from Server
                 global_params, n_push,_, is_available = modman.fetch_params(URL, ALIAS)
+                rety_cnt = 0
+                while not is_available:
+                    if rety_cnt==10:
+                        print("Maximum trying limits exceeded continue training with local parameters")
+                        global_params = modman.convert_tensor_to_list(pie.Q.state_dict())
+                        break
+                    print(f"Error while fetching global params, retry after 1 sec. {rety_cnt}/10")
+                    sleep(1)
+                    global_params, n_push,_, is_available = modman.fetch_params(URL, ALIAS)
                 n_steps=n_push
                 # print("Params->", global_params)
                 pie.Q.load_state_dict(modman.convert_list_to_tensor(global_params))
@@ -318,10 +336,11 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
     tft.append(etft-stft)
 
 P('Finished Training!')
-log_dir = './logs_csv/'
+modman.set_complete(URL, ALIAS)
+log_dir = './logs/'
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
-sav_instance_path = f'{log_dir+ENV_NAME}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}_finished'
+sav_instance_path = f'{log_dir}Finished{ENV_NAME}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}'
 with open(sav_instance_path +'.csv', 'w' ) as f:
     f.write(LOG_CSV)
 
@@ -357,5 +376,5 @@ log_data.append(['MIN time for epoch:', np.min(tpc)])
 log_data.append(['MAX time for epoch:', np.max(tpc)])
 log_data.append(['\nTotal time for epoch:->', np.sum(tpc)])
 log_data.append(['\nTotal time for testing:->', np.sum(tft)])
-modman.csv_writer(path=path1,data=log_data)
-modman.csv_writer(path=path2,data=REW)
+#modman.csv_writer(path=path1,data=log_data)
+#modman.csv_writer(path=path2,data=REW)
