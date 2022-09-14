@@ -7,7 +7,7 @@ import torch
 import test_score as ts
 import verifyer as vf
 from time import sleep
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import csv
 import datetime
 from os import getpid
@@ -65,14 +65,14 @@ while True:
                 aggregation_ratio = 1
                 if client_key in clients_verify_stats and client_key in clients_round:
                     aggregation_ratio = (len(clients_round[c_key])/len(clients_verify_stats[client_key][1]))
-                aggregation_weight = mean_scores[client_key]/(AGGREGATION_SCORE[client_key] +0.0_00_00_00_001) * aggregation_ratio 
+                aggregation_weight =  abs( mean_scores[client_key]/(AGGREGATION_SCORE[client_key] +0.0_00_00_00_001) * aggregation_ratio )
                 print(f'Calculated aggregation weight: ', aggregation_weight)
                 print(f'---->1 : {AGGREGATION_SCORE[c_key]}')
                 AGGREGATION_SCORE[client_key] = (aggregation_weight + AGGREGATION_SCORE[client_key])/2.0
                 if client_key not in clients_verify_stats: # logging clients reports
-                    clients_verify_stats[client_key]=[[aggregation_weight],[round]]                    
+                    clients_verify_stats[client_key]=[[aggregation_weight9],[round]]                    
                 else:
-                    clients_verify_stats[client_key][0].append(aggregation_weight)
+                    clients_verify_stats[client_key][0].append(aggregation_weight/len(honest))
                     clients_verify_stats[client_key][1].append(round)
                 print(f'---->2 : {AGGREGATION_SCORE[c_key]}')
                 params, score = all_params_wscore[client_key]
@@ -107,14 +107,14 @@ for c_key in clients_verify_stats:
     x = clients_verify_stats[c_key][1]
     y = clients_verify_stats[c_key][0]
     print(f'logging for client {c_key}............')
-    plt.plot(x, y)
-    plt.ylabel('Aggregation Contribution')
-    plt.xlabel('Global rounds')
-    plt.grid()
-    plt.savefig(f'{log_dir}client_{c_key[4:]}_{stamp.strftime("%d_%m-%H_%M")}.png')
-    # plt.title(f' Contribution graph')
-    # plt.show()
-    plt.close()
+    # plt.plot(x, y)
+    # plt.ylabel('Aggregation Contribution')
+    # plt.xlabel('Global rounds')
+    # plt.grid()
+    # plt.savefig(f'{log_dir}client_{c_key[4:]}_{stamp.strftime("%d_%m-%H_%M")}.png')
+    # # plt.title(f' Contribution graph')
+    # # plt.show()
+    # plt.close()
 
     print(f'********************* logging:{c_key} *********************')
     newfilePath = f'{log_dir+"Finished_contri_"+ALIAS}_C_{c_key[4:]}_{stamp.strftime("%d_%m-%H_%M")}_finished'
