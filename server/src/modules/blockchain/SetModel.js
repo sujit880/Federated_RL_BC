@@ -7,7 +7,7 @@ module.exports = (params) => {
             ModelID: params[0],
             ModelParams: params[1],
             LearningRate: params[2],
-            NPush: 50,
+            NPush: 200,
             Iteration: -1,
             ModelUpdateCount: -1,
             ModelReadLock: false,

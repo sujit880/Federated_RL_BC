@@ -31,13 +31,21 @@ def verifier(Scores):
     print("Mean: ",score_mean)
     malicious = []
     honest=[]
-    for index in range (len(keys)):
-        if values[index] < (score_mean -(score_mean *(1 -sigma))):
-            print("Detect malicious client: ", keys[index])
-            malicious.append(keys[index])
+    for client_key in Scores:
+        if score_mean >0:
+            if Scores[client_key] < (score_mean * sigma):
+                print("Detect malicious client: ", client_key)
+                malicious.append(client_key)
+            else:
+                print("Detected honest client")
+                honest.append(client_key)
         else:
-            print("Detected honest client")
-            honest.append(keys[index])
+            if Scores[client_key] < (score_mean * (1+(1 -sigma))):
+                print("Detect malicious client: ", client_key)
+                malicious.append(client_key)
+            else:
+                print("Detected honest client")
+                honest.append(client_key)
     return honest,malicious
 
 # print(verifier(Scores=Scores))
@@ -47,12 +55,20 @@ def verifier_wg(Scores, global_score):
     malicious = []
     honest=[]
     for client_key in Scores:
-        if Scores[client_key] < (global_score -(global_score *(1 -sigma))):
-            print("Detect malicious client: ", client_key)
-            malicious.append(client_key)
+        if global_score >0:
+            if Scores[client_key] < (global_score * sigma):
+                print("Detect malicious client: ", client_key)
+                malicious.append(client_key)
+            else:
+                print("Detected honest client")
+                honest.append(client_key)
         else:
-            print("Detected honest client")
-            honest.append(client_key)
+            if Scores[client_key] < (global_score * (1+(1 -sigma))):
+                print("Detect malicious client: ", client_key)
+                malicious.append(client_key)
+            else:
+                print("Detected honest client")
+                honest.append(client_key)
     if len(honest)==0:
        honest,malicious = verifier(Scores=Scores)
     return honest,malicious

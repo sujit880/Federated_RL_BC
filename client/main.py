@@ -34,6 +34,7 @@ now = datetime.datetime.now
 ##############################################
 ALIAS = 'experiment_01'
 ENV_NAME = 'CartPole-v0'
+ENV_NAME = 'LunarLander-v2'
 
 # For test locally -> ..
 # API endpoint
@@ -69,8 +70,8 @@ EXP_PARAMS.DECAY_ADD = 0
 
 
 PIE_PARAMS = INFRA()
-PIE_PARAMS.LAYERS = [128, 128, 128]
-PIE_PARAMS.OPTIM = torch.optim.RMSprop # 1. RMSprop, 2. Adam, 3. SGD
+PIE_PARAMS.LAYERS = [80, 68]
+PIE_PARAMS.OPTIM = torch.optim.Adam # 1. RMSprop, 2. Adam, 3. SGD
 PIE_PARAMS.LOSS = torch.nn.MSELoss
 PIE_PARAMS.LR = 0.001
 PIE_PARAMS.DISCOUNT = 0.999999
@@ -79,18 +80,21 @@ PIE_PARAMS.TUF = 4
 PIE_PARAMS.DEV = 'cpu'
 
 TRAIN_PARAMS = INFRA()
-TRAIN_PARAMS.EPOCHS = 5_00_000
+TRAIN_PARAMS.EPOCHS = 4_00_000
 TRAIN_PARAMS.MOVES = 10
 TRAIN_PARAMS.EPISODIC = False
 TRAIN_PARAMS.MIN_MEM = 30
 TRAIN_PARAMS.LEARN_STEPS = 1
 TRAIN_PARAMS.BATCH_SIZE = 50
-TRAIN_PARAMS.TEST_FREQ = 10
+TRAIN_PARAMS.TEST_FREQ = 50
 
 TEST_PARAMS = INFRA()
 TEST_PARAMS.CERF = 100
 TEST_PARAMS.RERF = 100
 
+checkpoints = True
+maximum_reward = -9999999999999
+check_epochs = 0
 
 P = print
 
@@ -233,7 +237,7 @@ tft = [] # Time for testing
 L_T = [] # Learning Time
 REW = [] # Rewards list
 REW.append([f'\n\nTesting Data for Client IPAddres: {IPAddr} Pid: {getpid()} ..'])
-max_reward1 = Queue(maxsize=100)
+max_reward1 = Queue(maxsize=10)
 
 P('after max_reward queue')
 exp.reset(clear_mem=True, reset_epsilon=True)
@@ -313,6 +317,14 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
         if(max_reward1.full()):
             max_reward1.get()
         max_reward1.put(trew)
+        if checkpoints:
+            if maximum_reward<trew:                
+                maximum_reward = trew
+                pie.save(f'./models/checkmodel_{maximum_reward}_{ENV_NAME}_{epoch}.pi')
+            elif maximum_reward == trew and (epoch - check_epochs)>500:
+                pie.save(f'./models/checkmodel_{maximum_reward}_{ENV_NAME}_{epoch}.pi')
+            check_epochs = epoch
+
         #print('after queue')
         P('[#]'+str(epoch+1), '\t',
             '[REW]'+str(trew),
@@ -321,7 +333,7 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
         LOG_CSV +=f'{str(epoch+1)},{str(trew)},{str(pie.train_count)},{str(pie.update_count)}\n'
         REW.append(["Rew: ",trew, "Train_count: ", pie.train_count, "Update_count: ", pie.update_count])
         if(max_reward1.full()):
-            if(np.mean(max_reward1.queue) >= 195):
+            if(np.mean(max_reward1.queue) >= 155):
                 break
     etft = now() # End time for testing
     tft.append(etft-stft)

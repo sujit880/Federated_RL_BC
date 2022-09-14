@@ -32,7 +32,7 @@ LOG_CSV = 'epoch,reward,tr,up\n'
 ##############################################
 ALIAS = 'experiment_01'
 ENV_NAME = 'CartPole-v0'
-
+ENV_NAME = 'LunarLander-v2'
 # API endpoint
 URL = "http://localhost:3001/api/model/"
 
@@ -52,7 +52,7 @@ EXP_PARAMS.DECAY_ADD = 0
 
 
 PIE_PARAMS = INFRA()
-PIE_PARAMS.LAYERS = [128, 128, 128]
+PIE_PARAMS.LAYERS = [80, 68]
 PIE_PARAMS.OPTIM = torch.optim.RMSprop  # SGD
 PIE_PARAMS.LOSS = torch.nn.MSELoss
 PIE_PARAMS.LR = 0.001
