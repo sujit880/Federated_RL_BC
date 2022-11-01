@@ -148,6 +148,8 @@ class PIE:
             if self.train_count % self.tuf == 0:
                 self.T.load_state_dict(self.Q.state_dict())
                 self.update_count+=1
+        
+        return loss.item()
 
     def render(self, mode=0, p=print):
         p('=-=-=-=-==-=-=-=-=\nQ-NET\n=-=-=-=-==-=-=-=-=')

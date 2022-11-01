@@ -16,7 +16,7 @@ import modman
 
 from queue import Queue
 import gym
-
+import os
 from copy import deepcopy
 from time import sleep
 import socket   
@@ -226,8 +226,22 @@ P('after max_reward queue')
 exp.reset(clear_mem=True, reset_epsilon=True)
 txp.reset(clear_mem=True, reset_epsilon=True)
 
+LOG_CSV = 'epoch,reward,tr,up,loss\n'
+
+
 lt1=now() # setting initial learning time
 for epoch in range(0, TRAIN_PARAMS.EPOCHS):
+
+
+    loss = None
+    if((epoch+1)% 1_000 == 0):
+        log_dir = './logs/'
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+        sav_instance_path = f'{log_dir+str(getpid())+":"+ENV_NAME}_{stpc.strftime("%d_%m_%Y-%H_%M_%S")}'
+        with open(sav_instance_path +'.csv', 'w' ) as f:
+            f.write(LOG_CSV)
+
     stpc = now() # start time for epoch
     lt1 +=(now()-lt1)  # time at epoch start
     # exploration
@@ -238,7 +252,7 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
 
         for _ in range(TRAIN_PARAMS.LEARN_STEPS):
             # Single Learning Step
-            pie.learn(exp.memory, TRAIN_PARAMS.BATCH_SIZE)
+            loss = pie.learn(exp.memory, TRAIN_PARAMS.BATCH_SIZE)
             sleep(0.01)
             # Send Parameters to Server
             if (epoch+1)%n_steps==0:
@@ -291,12 +305,21 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
             '[REW]'+str(trew),
             '[TR]'+str(pie.train_count),
             '[UP]'+str(pie.update_count))
+        LOG_CSV +=f'{str(epoch+1)},{str(trew)},{str(pie.train_count)},{str(pie.update_count)},{loss}\n'
         REW.append(["Rew: ",trew, "Train_count: ", pie.train_count, "Update_count: ", pie.update_count])
         if(max_reward1.full()):
             if(np.mean(max_reward1.queue) >= 200):
                 break
     etft = now() # End time for testing
     tft.append(etft-stft)
+
+log_dir = './logs/'
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
+sav_instance_path = f'{log_dir+str(getpid())+":Finished"+ENV_NAME}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}_finished'
+with open(sav_instance_path +'.csv', 'w' ) as f:
+    f.write(LOG_CSV)
+
 P('Finished Training!')
 elapse = now() - stamp
 P('Time Elapsed:', elapse)
