@@ -110,9 +110,9 @@ env = gym.make(ENV_NAME)
 venv = gym.make(ENV_NAME)
 
 # Policy and Exploration
-exp = EXP(env=env, cap=EXP_PARAMS.MEM_CAP, epsilonT=EXP_PARAMS.EPST)
+# exp = EXP(env=env, cap=EXP_PARAMS.MEM_CAP, epsilonT=EXP_PARAMS.EPST)
 
-txp = EXP(env=venv, cap=math.inf, epsilonT=(0, 0, 0))
+# txp = EXP(env=venv, cap=math.inf, epsilonT=(0, 0, 0))
 
 
 def decayF(epsilon, moves, isdone):
@@ -157,7 +157,6 @@ global_params, n_push, log_id, is_available = modman.fetch_params(URL, ALIAS)
 n_steps = n_push
 print("After fetch Params")
 
-# TODO FROM HERE
 
 if is_available:
     P("Model exist")
@@ -168,15 +167,11 @@ if is_available:
     log_data.append(["Model exist"])
     log_data.append(['Loading Q params .......'])
     log_data.append(["Number Push: ", n_push])
-    pie.Q.load_state_dict(modman.convert_list_to_tensor(global_params))
-    pie.Q.eval()
-    P("Loading T params .....")
-    pie.T.load_state_dict(pie.Q.state_dict())
-    pie.T.eval()
+    pie.load_state_dict(modman.convert_list_to_tensor(global_params))
 else:
     P("Setting model for server")
     global_params, n_push, log_id, Iteration = modman.send_model_params(
-        URL, modman.convert_tensor_to_list(pie.Q.state_dict()), PIE_PARAMS.LR, ALIAS)
+        URL, modman.convert_tensor_to_list(pie.state_dict()), PIE_PARAMS.LR, ALIAS)
     global_params, n_push, log_id, is_available = modman.fetch_params(
         URL, ALIAS)
     P("Number Push: ", n_push)
@@ -186,8 +181,8 @@ else:
     log_data.append(["Number Push: ", n_push])
     # print(reply)
     # print("\n\n........Params->", global_params)
-    pie.Q.load_state_dict(modman.convert_list_to_tensor(global_params))
-    pie.Q.eval()
+    pie.load_state_dict(modman.convert_list_to_tensor(global_params))
+
 n_steps = n_push
 log_path = './client/logs/'
 log_file = log_id + 'client_logs.csv'
@@ -221,11 +216,14 @@ REW.append(
 max_reward1 = Queue(maxsize=100)
 
 P('after max_reward queue')
-exp.reset(clear_mem=True, reset_epsilon=True)
-txp.reset(clear_mem=True, reset_epsilon=True)
+# exp.reset(clear_mem=True, reset_epsilon=True)
+# txp.reset(clear_mem=True, reset_epsilon=True)
 
 LOG_CSV = 'epoch,reward,tr,up,loss\n'
 
+current_observation = env.reset()
+
+# TODO FROM HERE
 
 lt1 = now()  # setting initial learning time
 for epoch in range(0, TRAIN_PARAMS.EPOCHS):
@@ -242,49 +240,49 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
     stpc = now()  # start time for epoch
     lt1 += (now()-lt1)  # time at epoch start
     # exploration
-    _ = exp.explore(pie, moves=TRAIN_PARAMS.MOVES,
-                    decay=decayF, episodic=TRAIN_PARAMS.EPISODIC)
+    # _ = exp.explore(pie, moves=TRAIN_PARAMS.MOVES,
+    #                 decay=decayF, episodic=TRAIN_PARAMS.EPISODIC)
 
-    if exp.memory.count >= TRAIN_PARAMS.MIN_MEM:
+    # if exp.memory.count >= TRAIN_PARAMS.MIN_MEM:
 
-        for _ in range(TRAIN_PARAMS.LEARN_STEPS):
-            # Single Learning Step
-            loss = pie.learn(env)
-            sleep(0.01)
-            # Send Parameters to Server
-            if (epoch+1) % n_steps == 0:
-                lt2 = now()
-                print("Learning Time: ", lt2-lt1)
-                L_T.append(lt2-lt1)
-                lt1 = now()  # setting new initial learning time
-                t1 = now()  # time stamp at the start time for communication
+    #     for _ in range(TRAIN_PARAMS.LEARN_STEPS):
+    # Single Learning Step
+    loss = pie.learn(env)
+    sleep(0.01)
+    # Send Parameters to Server
+    if (epoch+1) % n_steps == 0:
+        lt2 = now()
+        print("Learning Time: ", lt2-lt1)
+        L_T.append(lt2-lt1)
+        lt1 = now()  # setting new initial learning time
+        t1 = now()  # time stamp at the start time for communication
 
-                # Sending Locally Trained Params
-                print("Sending Local Params")
-                reply = modman.send_local_update(URL,
-                                                 modman.convert_tensor_to_list(
-                                                     pie.Q.state_dict()),
-                                                 epoch, ALIAS)
-                print(reply, "\n Local update sent")
-                log_data.append(reply)
+        # Sending Locally Trained Params
+        print("Sending Local Params")
+        reply = modman.send_local_update(URL,
+                                         modman.convert_tensor_to_list(
+                                             pie.Q.state_dict()),
+                                         epoch, ALIAS)
+        print(reply, "\n Local update sent")
+        log_data.append(reply)
 
-                # Wait for Model Lock to get Released
-                while modman.get_model_lock(URL, ALIAS):
-                    print("Waiting for Model Lock Release2.")
-                    sleep(0.05)
+        # Wait for Model Lock to get Released
+        while modman.get_model_lock(URL, ALIAS):
+            print("Waiting for Model Lock Release2.")
+            sleep(0.05)
 
-                # Get Updated Model Params from Server
-                global_params, n_push, _, is_available = modman.fetch_params(
-                    URL, ALIAS)
-                n_steps = n_push
-                # print("Params->", global_params)
-                pie.Q.load_state_dict(
-                    modman.convert_list_to_tensor(global_params))
-                pie.Q.eval()
+        # Get Updated Model Params from Server
+        global_params, n_push, _, is_available = modman.fetch_params(
+            URL, ALIAS)
+        n_steps = n_push
+        # print("Params->", global_params)
+        pie.Q.load_state_dict(
+            modman.convert_list_to_tensor(global_params))
+        pie.Q.eval()
 
-                t2 = now()  # time stamp at the end time of communication
-                print("Communication delay: ", t2-t1)
-                c_d1.append(t2-t1)
+        t2 = now()  # time stamp at the end time of communication
+        print("Communication delay: ", t2-t1)
+        c_d1.append(t2-t1)
     etpc = now()  # end time for epoch
     tpc.append(etpc-stpc)
     stft = now()  # Start time for testing

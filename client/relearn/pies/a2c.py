@@ -167,6 +167,8 @@ class CriticNet(torch.nn.Module):
         loss.backward()
         self.optimizer.step()
 
+        return loss
+
 
 class A2C:
 
@@ -275,6 +277,10 @@ class A2C:
 
         self.train_count += 1
 
+        # if environment is done, reset and return the new observation, instead of returning next_observation, return it
+        if done:
+            return env.reset()
+
         return next_observation
 
     # def render(self, mode=0, p=print):
@@ -289,7 +295,43 @@ class A2C:
     #     self._clear_acnet()
     #     return
 
+    def load_state_dict(self, state_dict: Dict[str, Any]) -> None:
+        '''
+        Segregate and load parameters from the merged dict into the actor and critic models
+        '''
+
+        actor, critic = {}, {}
+
+        for key, value in state_dict.items():
+            if 'actor' in key:
+                actor[key] = value
+            else:
+                critic[key] = value
+
+        self.actor_net.load_state_dict(actor)
+        self.critic_net.load_state_dict(critic)
+
+        self.actor_net.eval()
+        self.critic_net.eval()
+
+    def state_dict(self) -> Dict[str, Any]:
+        '''
+        Return the state dict of both actor and critic networks as a single dict
+        '''
+
+        # get the actor dict in merged dict
+        merged = self.actor_net.get_weights().copy()
+
+        # merge the actor dict with the critic dict
+        merged.update(self.critic_net.get_weights().copy())
+
+        return merged
+
     def _one_hot_encode_action(self, action, n_actions):
         encoded = torch.zeros(n_actions, torch.float32)
         encoded[action] = 1
         return encoded
+
+
+# TODO return loss from training function
+# and continue from main file
