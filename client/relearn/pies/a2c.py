@@ -75,7 +75,7 @@ class ActorNet(torch.nn.Module):
 
         x: torch.Tensor, the input tensor for forward pass of the Neural Network
         '''
-        target = y.detach().clone()
+        target = y.detach().clone().float()
 
         # Forward Pass
         pred = self.forward(x)
@@ -148,7 +148,7 @@ class CriticNet(torch.nn.Module):
         '''
         return self.network(x)
 
-    def fit(self, x: torch.Tensor, y: torch.Tensor) -> float:
+    def fit(self, x: torch.Tensor, y: torch.Tensor):
         '''
         Method to train the Neural Network
 
@@ -157,7 +157,7 @@ class CriticNet(torch.nn.Module):
         x: torch.Tensor, the input tensor for forward pass of the Neural Network
         '''
 
-        target = y.detach().clone()
+        target = y.detach().clone().float()
 
         # Forward Pass
         pred = self.forward(x)
@@ -241,19 +241,15 @@ class A2C:
         '''
         Predict the concrete action based on the obervation provided to the actor network
         '''
-        with self.actor_net.eval():
-            # also can be torch.argmax, for maximum probability
-            action = self.actor_net(observation)
-            return action.sample().detach().item()
+        # with self.actor_net.eval():
+        # also can be torch.argmax, for maximum probability
+        action = self.actor_net(torch.from_numpy(observation))
+        return torch.argmax(action).detach().item()
 
     def learn(self, env, observation) -> Tuple[Any, Tuple[float, float]]:
         '''
         Train the model of a single step
         '''
-        # keep only the observations
-        observation = observation[0]
-
-        print(observation, type(observation))
 
         # Reshape Observations => model dims are (batch, env.observation_space.n)
         observation_reshaped = torch.from_numpy(observation.reshape(
@@ -268,25 +264,28 @@ class A2C:
 
         # Reshape Next Observations => model dims are (batch, env.observation_space.n)
         next_observation, reward, done, _ = env.step(action)
-        next_observation_reshaped = next_observation.reshape(
-            [1, next_observation.shape[0]])
+        next_observation_reshaped = torch.from_numpy(next_observation.reshape(
+            [1, next_observation.shape[0]]))
 
         value_curr = np.asscalar(
-            np.array(self.critic_net.predict(observation_reshaped)))
+            np.array(self.critic_net(observation_reshaped).detach().numpy()))
         value_next = np.asscalar(
-            np.array(self.critic_net.predict(next_observation_reshaped)))
+            np.array(self.critic_net(next_observation_reshaped).detach().numpy()))
 
         # Fit on the current observation
         td_target = reward + (1 - done) * self.discount * value_next
         advantage = td_target - value_curr
-        print(np.around(action_probs, 2), np.around(value_next -
+        print(np.around(action_probs.detach().numpy(), 2), np.around(value_next -
               value_curr, 3), 'Advantage:', np.around(advantage, 2))
+
         advantage_reshaped = np.vstack([advantage])
         td_target = np.vstack([td_target])
-        critic_loss = self.critic_net.fit(observation_reshaped, td_target)
+        critic_loss = self.critic_net.fit(
+            observation_reshaped, torch.from_numpy(td_target))
 
-        gradient = encoded_action - action_probs
-        gradient_with_advantage = .0001 * gradient * advantage_reshaped + action_probs
+        gradient = torch.from_numpy(encoded_action) - action_probs
+        gradient_with_advantage = .0001 * gradient * \
+            torch.from_numpy(advantage_reshaped) + action_probs
         actor_loss = self.actor_net.fit(
             observation_reshaped, gradient_with_advantage)
 
@@ -294,9 +293,9 @@ class A2C:
 
         # if environment is done, reset and return the new observation, instead of returning next_observation, return it
         if done:
-            return env.reset()
+            return env.reset(), tuple([actor_loss, critic_loss])
 
-        return next_observation, (actor_loss, critic_loss)
+        return next_observation, tuple([actor_loss, critic_loss])
 
     # def render(self, mode=0, p=print):
     #     return None

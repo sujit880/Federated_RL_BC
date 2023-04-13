@@ -218,6 +218,7 @@ LOG_CSV = 'epoch,reward,tr,loss\n'
 
 current_observation = env.reset()
 
+
 # TODO FROM HERE
 
 lt1 = now()  # setting initial learning time
@@ -243,6 +244,9 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
     #     for _ in range(TRAIN_PARAMS.LEARN_STEPS):
     # Single Learning Step
     current_observation, loss = pie.learn(env, current_observation)
+
+    print('curr1010', current_observation, 'END')
+
     sleep(0.01)
     # Send Parameters to Server
     if (epoch+1) % n_steps == 0:
