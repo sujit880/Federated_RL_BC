@@ -25,7 +25,7 @@ now = datetime.datetime.now
 ##############################################
 # SETUP Hyperparameters
 ##############################################
-ALIAS = 'experiment_01'
+ALIAS = '5client'
 ENV_NAME = 'CartPole-v0'
 
 # For test locally -> ..
@@ -81,6 +81,9 @@ TRAIN_PARAMS.TEST_FREQ = 10
 TEST_PARAMS = INFRA()
 TEST_PARAMS.CERF = 100
 TEST_PARAMS.RERF = 100
+
+
+MODEL_HYPARAMS = f'LR-{PIE_PARAMS.LR}_TF-{TRAIN_PARAMS.TEST_FREQ}_BS-{TRAIN_PARAMS.BATCH_SIZE}_LS-{TRAIN_PARAMS.LEARN_STEPS}'
 
 
 P = print
@@ -308,7 +311,7 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
 log_dir = './logs/'
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
-sav_instance_path = f'{log_dir+str(getpid())+":Finished"+ENV_NAME}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}_finished'
+sav_instance_path = f'{log_dir+str(getpid())+":END"+ENV_NAME}_{ALIAS}_EPC-{pie.train_count}_{MODEL_HYPARAMS}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}_FINISHED'
 with open(sav_instance_path + '.csv', 'w') as f:
     f.write(LOG_CSV)
 
