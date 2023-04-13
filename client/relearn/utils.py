@@ -1,10 +1,10 @@
 def RMSprop_update(params,
-                    grads,
-                    square_avgs,
-                    weight_decay,
-                    lr,
-                    eps,
-                    alpha):
+                   grads,
+                   square_avgs,
+                   weight_decay,
+                   lr,
+                   eps,
+                   alpha):
     """Functional API that performs rmsprop algorithm computation.
     See :class:`~torch.optim.RMSProp` for details.
     """
@@ -20,3 +20,22 @@ def RMSprop_update(params,
         avg = square_avg.sqrt().add_(eps)
         param.addcdiv_(grad, avg, value=-lr)
     return params
+
+
+def test_model(env, model):
+    '''
+    Test a model for the total rewards it can collect
+    '''
+    observation = env.reset()
+    done = False
+    total_reward = 0.0
+    while not done:
+        action = model.predict(observation)
+
+        next_observation, reward, done, _ = env.step(action)
+
+        observation = next_observation
+
+        total_reward += reward
+
+    return total_reward

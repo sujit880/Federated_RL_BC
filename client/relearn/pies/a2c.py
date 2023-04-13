@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 
 import numpy as np
 import torch
@@ -67,7 +67,7 @@ class ActorNet(torch.nn.Module):
         '''
         return self.network(x)
 
-    def train(self, x: torch.Tensor, y: torch.Tensor) -> None:
+    def fit(self, x: torch.Tensor, y: torch.Tensor) -> float:
         '''
         Method to train the Neural Network
 
@@ -87,6 +87,8 @@ class ActorNet(torch.nn.Module):
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+
+        return loss.item()
 
 
 class CriticNet(torch.nn.Module):
@@ -146,7 +148,7 @@ class CriticNet(torch.nn.Module):
         '''
         return self.network(x)
 
-    def train(self, x: torch.Tensor, y: torch.Tensor) -> None:
+    def fit(self, x: torch.Tensor, y: torch.Tensor) -> float:
         '''
         Method to train the Neural Network
 
@@ -154,6 +156,7 @@ class CriticNet(torch.nn.Module):
 
         x: torch.Tensor, the input tensor for forward pass of the Neural Network
         '''
+
         target = y.detach().clone()
 
         # Forward Pass
@@ -167,7 +170,7 @@ class CriticNet(torch.nn.Module):
         loss.backward()
         self.optimizer.step()
 
-        return loss
+        return loss.item()
 
 
 class A2C:
@@ -234,21 +237,32 @@ class A2C:
         self.critic_net.load_state_dict(self.critic_base_model.state_dict())
         self.critic_net.eval()
 
-    # def predict(self, state):
-    #     state = th.FloatTensor(state).to(self.device)
-    #     logits, _ = self.actor_critic_net.forward(state)
-    #     dist = nn.functional.softmax(logits, dim=0)
-    #     probs = th.distributions.Categorical(dist)
+    def predict(self, observation: np.array) -> int:
+        '''
+        Predict the concrete action based on the obervation provided to the actor network
+        '''
+        with self.actor_net.eval():
+            # also can be torch.argmax, for maximum probability
+            action = self.actor_net(observation)
+            return action.sample().detach().item()
 
-    #     return probs.sample().detach().item()
+    def learn(self, env, observation) -> Tuple[Any, Tuple[float, float]]:
+        '''
+        Train the model of a single step
+        '''
+        # keep only the observations
+        observation = observation[0]
 
-    def learn(self, env, observation):
+        print(observation, type(observation))
+
         # Reshape Observations => model dims are (batch, env.observation_space.n)
-        observation_reshaped = observation.reshape([1, observation.shape[0]])
+        observation_reshaped = torch.from_numpy(observation.reshape(
+            [1, observation.shape[0]]))
         action_probs = self.actor_net(observation_reshaped).flatten()
 
         # Note we're sampling from the prob distribution instead of using argmax
-        action = np.random.choice(env.action_space.n, 1, p=action_probs)[0]
+        action = np.random.choice(
+            env.action_space.n, 1, p=action_probs.detach().numpy())[0]
         encoded_action = self._one_hot_encode_action(
             action, env.action_space.n)
 
@@ -269,11 +283,12 @@ class A2C:
               value_curr, 3), 'Advantage:', np.around(advantage, 2))
         advantage_reshaped = np.vstack([advantage])
         td_target = np.vstack([td_target])
-        self.critic_net.train(observation_reshaped, td_target)
+        critic_loss = self.critic_net.fit(observation_reshaped, td_target)
 
         gradient = encoded_action - action_probs
         gradient_with_advantage = .0001 * gradient * advantage_reshaped + action_probs
-        self.actor_net.train(observation_reshaped, gradient_with_advantage)
+        actor_loss = self.actor_net.fit(
+            observation_reshaped, gradient_with_advantage)
 
         self.train_count += 1
 
@@ -281,7 +296,7 @@ class A2C:
         if done:
             return env.reset()
 
-        return next_observation
+        return next_observation, (actor_loss, critic_loss)
 
     # def render(self, mode=0, p=print):
     #     return None
@@ -303,10 +318,13 @@ class A2C:
         actor, critic = {}, {}
 
         for key, value in state_dict.items():
-            if 'actor' in key:
-                actor[key] = value
-            else:
-                critic[key] = value
+            print(key)
+            if 'actor.' in key:
+                actor[key.replace('actor.', '')] = value
+            elif 'critic.' in key:
+                critic[key.replace('critic.', '')] = value
+
+        print(critic)
 
         self.actor_net.load_state_dict(actor)
         self.critic_net.load_state_dict(critic)
@@ -319,19 +337,27 @@ class A2C:
         Return the state dict of both actor and critic networks as a single dict
         '''
 
-        # get the actor dict in merged dict
-        merged = self.actor_net.get_weights().copy()
+        # get the actor dict
+        actor = self.actor_net.get_weights().copy()
+
+        # for all keys in the actor net, append 'actor.' in it
+        actor = {f'actor.{key}': value for key, value in actor.items()}
+
+        # get the critic dict
+        critic = self.critic_net.get_weights().copy()
+
+        # for all keys in the critic net, append 'critic.' in it
+        critic = {f'critic.{key}': value for key, value in critic.items()}
+
+        print(actor)
 
         # merge the actor dict with the critic dict
-        merged.update(self.critic_net.get_weights().copy())
+        merged = actor
+        merged.update(critic)
 
         return merged
 
     def _one_hot_encode_action(self, action, n_actions):
-        encoded = torch.zeros(n_actions, torch.float32)
+        encoded = np.zeros(n_actions)
         encoded[action] = 1
         return encoded
-
-
-# TODO return loss from training function
-# and continue from main file

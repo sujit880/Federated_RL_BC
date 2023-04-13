@@ -1,23 +1,18 @@
 # Import Libraries
-from cmath import log
-import math
 import datetime
 from os import getpid
-import random
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
 
 from relearn.pies.a2c import A2C
-from relearn.explore import EXP, MEM
-from relearn.pies.utils import compare_weights
+from relearn.utils import test_model
 
 import modman
 
 from queue import Queue
 import gym
 import os
-from copy import deepcopy
 from time import sleep
 import socket
 
@@ -57,11 +52,11 @@ class INFRA:
         pass
 
 
-EXP_PARAMS = INFRA()
-EXP_PARAMS.MEM_CAP = 1
-EXP_PARAMS.EPST = (0.95, 0.05, 0.95)  # (start, min, max)
-EXP_PARAMS.DECAY_MUL = 0.99999
-EXP_PARAMS.DECAY_ADD = 0
+# EXP_PARAMS = INFRA()
+# EXP_PARAMS.MEM_CAP = 1
+# EXP_PARAMS.EPST = (0.95, 0.05, 0.95)  # (start, min, max)
+# EXP_PARAMS.DECAY_MUL = 0.99999
+# EXP_PARAMS.DECAY_ADD = 0
 
 
 PIE_PARAMS = INFRA()
@@ -219,7 +214,7 @@ P('after max_reward queue')
 # exp.reset(clear_mem=True, reset_epsilon=True)
 # txp.reset(clear_mem=True, reset_epsilon=True)
 
-LOG_CSV = 'epoch,reward,tr,up,loss\n'
+LOG_CSV = 'epoch,reward,tr,loss\n'
 
 current_observation = env.reset()
 
@@ -247,7 +242,7 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
 
     #     for _ in range(TRAIN_PARAMS.LEARN_STEPS):
     # Single Learning Step
-    loss = pie.learn(env)
+    current_observation, loss = pie.learn(env, current_observation)
     sleep(0.01)
     # Send Parameters to Server
     if (epoch+1) % n_steps == 0:
@@ -261,7 +256,7 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
         print("Sending Local Params")
         reply = modman.send_local_update(URL,
                                          modman.convert_tensor_to_list(
-                                             pie.Q.state_dict()),
+                                             pie.state_dict()),
                                          epoch, ALIAS)
         print(reply, "\n Local update sent")
         log_data.append(reply)
@@ -276,9 +271,8 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
             URL, ALIAS)
         n_steps = n_push
         # print("Params->", global_params)
-        pie.Q.load_state_dict(
+        pie.load_state_dict(
             modman.convert_list_to_tensor(global_params))
-        pie.Q.eval()
 
         t2 = now()  # time stamp at the end time of communication
         print("Communication delay: ", t2-t1)
@@ -287,12 +281,10 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
     tpc.append(etpc-stpc)
     stft = now()  # Start time for testing
     # P("after explore epoch#:",epoch)
+
     if epoch == 0 or (epoch+1) % TRAIN_PARAMS.TEST_FREQ == 0:
-        txp.reset(clear_mem=True)
-        timesteps = txp.explore(
-            pie, moves=1, decay=EXP.NO_DECAY, episodic=True)
-        res = txp.summary(P=lambda *arg: None)
-        trew = res[-1]
+        res = np.array([test_model(venv, pie) for _ in range(1)]).mean()
+        trew = res
         ref.append([trew])
         # print('before queue')
         if (max_reward1.full()):
@@ -301,11 +293,9 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
         # print('after queue')
         P('[#]'+str(epoch+1), '\t',
             '[REW]'+str(trew),
-            '[TR]'+str(pie.train_count),
-            '[UP]'+str(pie.update_count))
-        LOG_CSV += f'{str(epoch+1)},{str(trew)},{str(pie.train_count)},{str(pie.update_count)},{loss}\n'
-        REW.append(["Rew: ", trew, "Train_count: ", pie.train_count,
-                   "Update_count: ", pie.update_count])
+            '[TR]'+str(pie.train_count))
+        LOG_CSV += f'{str(epoch+1)},{str(trew)},{str(pie.train_count)},{str(loss)}\n'
+        REW.append(["Rew: ", trew, "Train_count: ", pie.train_count])
         if (max_reward1.full()):
             if (np.mean(max_reward1.queue) >= 200):
                 break
