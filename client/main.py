@@ -285,7 +285,7 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
     # P("after explore epoch#:",epoch)
 
     if epoch == 0 or (epoch+1) % TRAIN_PARAMS.TEST_FREQ == 0:
-        res = np.array([test_model(venv, pie) for _ in range(5)]).mean()
+        res = np.array([test_model(venv, pie) for _ in range(1)]).mean()
         trew = res
         ref.append([trew])
         # print('before queue')
