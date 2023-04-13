@@ -14,7 +14,7 @@ class ActorNet(torch.nn.Module):
     Actor Deep Neural Network class implementation
     '''
 
-    def __init__(self, state_dim: int, layer_list: List[int], action_dim: int, learning_rate=0.001, optimizer=torch.optim.Adam, loss_fn=torch.nn.MSELoss):
+    def __init__(self, state_dim: int, layer_list: List[int], action_dim: int, learning_rate=0.001, optimizer=torch.optim.Adam, loss_fn=torch.nn.NLLLoss()):
         '''
         Constructor method for Actor Critic Deep Neural Network
 
@@ -275,8 +275,8 @@ class A2C:
         # Fit on the current observation
         td_target = reward + (1 - done) * self.discount * value_next
         advantage = td_target - value_curr
-        print(np.around(action_probs.detach().numpy(), 2), np.around(value_next -
-              value_curr, 3), 'Advantage:', np.around(advantage, 2))
+        # print(np.around(action_probs.detach().numpy(), 2), np.around(value_next -
+        #       value_curr, 3), 'Advantage:', np.around(advantage, 2))
 
         advantage_reshaped = np.vstack([advantage])
         td_target = np.vstack([td_target])
@@ -317,13 +317,10 @@ class A2C:
         actor, critic = {}, {}
 
         for key, value in state_dict.items():
-            print(key)
             if 'actor.' in key:
                 actor[key.replace('actor.', '')] = value
             elif 'critic.' in key:
                 critic[key.replace('critic.', '')] = value
-
-        print(critic)
 
         self.actor_net.load_state_dict(actor)
         self.critic_net.load_state_dict(critic)
@@ -347,8 +344,6 @@ class A2C:
 
         # for all keys in the critic net, append 'critic.' in it
         critic = {f'critic.{key}': value for key, value in critic.items()}
-
-        print(actor)
 
         # merge the actor dict with the critic dict
         merged = actor

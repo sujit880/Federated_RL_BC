@@ -63,7 +63,7 @@ PIE_PARAMS = INFRA()
 PIE_PARAMS.LAYERS = [28, 28, 28]
 PIE_PARAMS.OPTIM = torch.optim.Adam  # 1. RMSprop, 2. Adam, 3. SGD
 PIE_PARAMS.LOSS = torch.nn.MSELoss
-PIE_PARAMS.LR = 0.001
+PIE_PARAMS.LR = 0.0001
 PIE_PARAMS.DISCOUNT = 0.999999
 PIE_PARAMS.DOUBLE = False
 PIE_PARAMS.TUF = 4
@@ -126,7 +126,7 @@ pie = A2C(
     # opt=PIE_PARAMS.OPTIM,
     # cost=PIE_PARAMS.LOSS,
     # lr=PIE_PARAMS.LR,
-    # dis=PIE_PARAMS.DISCOUNT,
+    # discount=PIE_PARAMS.DISCOUNT,
     # mapper=lambda x: x,
     # double=PIE_PARAMS.DOUBLE,
     # tuf=PIE_PARAMS.TUF,
@@ -245,8 +245,6 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
     # Single Learning Step
     current_observation, loss = pie.learn(env, current_observation)
 
-    print('curr1010', current_observation, 'END')
-
     sleep(0.01)
     # Send Parameters to Server
     if (epoch+1) % n_steps == 0:
@@ -287,7 +285,7 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
     # P("after explore epoch#:",epoch)
 
     if epoch == 0 or (epoch+1) % TRAIN_PARAMS.TEST_FREQ == 0:
-        res = np.array([test_model(venv, pie) for _ in range(1)]).mean()
+        res = np.array([test_model(venv, pie) for _ in range(5)]).mean()
         trew = res
         ref.append([trew])
         # print('before queue')
@@ -297,7 +295,8 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
         # print('after queue')
         P('[#]'+str(epoch+1), '\t',
             '[REW]'+str(trew),
-            '[TR]'+str(pie.train_count))
+            '[TR]'+str(pie.train_count),
+            '[CR]', np.mean(max_reward1.queue))
         LOG_CSV += f'{str(epoch+1)},{str(trew)},{str(pie.train_count)},{str(loss)}\n'
         REW.append(["Rew: ", trew, "Train_count: ", pie.train_count])
         if (max_reward1.full()):
