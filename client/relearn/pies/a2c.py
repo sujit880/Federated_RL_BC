@@ -246,7 +246,7 @@ class A2C:
         action = self.actor_net(torch.from_numpy(observation))
         return torch.argmax(action).detach().item()
 
-    def learn(self, env, observation) -> Tuple[Any, Tuple[float, float]]:
+    def learn(self, env, observation, seed) -> Tuple[Any, Tuple[float, float]]:
         '''
         Train the model of a single step
         '''
@@ -293,6 +293,7 @@ class A2C:
 
         # if environment is done, reset and return the new observation, instead of returning next_observation, return it
         if done:
+            # env.seed(seed)
             return env.reset(), tuple([actor_loss, critic_loss])
 
         return next_observation, tuple([actor_loss, critic_loss])

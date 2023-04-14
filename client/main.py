@@ -1,11 +1,12 @@
 # Import Libraries
+import random
 import datetime
 from os import getpid
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
 
-from relearn.pies.a2c import A2C
+from relearn.pies.ppo import PPO
 from relearn.utils import test_model
 
 import modman
@@ -25,8 +26,17 @@ now = datetime.datetime.now
 ##############################################
 # SETUP Hyperparameters
 ##############################################
-ALIAS = '5client'
+ALIAS = 'ppo6'
 ENV_NAME = 'CartPole-v0'
+
+
+##############################################
+# SETUP Seeds
+##############################################
+random.seed(0)
+np.random.seed(0)
+torch.manual_seed(0)
+
 
 # For test locally -> ..
 # API endpoint
@@ -63,8 +73,8 @@ PIE_PARAMS = INFRA()
 PIE_PARAMS.LAYERS = [28, 28, 28]
 PIE_PARAMS.OPTIM = torch.optim.Adam  # 1. RMSprop, 2. Adam, 3. SGD
 PIE_PARAMS.LOSS = torch.nn.MSELoss
-PIE_PARAMS.LR = 0.0001
-PIE_PARAMS.DISCOUNT = 0.999999
+PIE_PARAMS.LR = 0.001
+PIE_PARAMS.DISCOUNT = 0.99
 PIE_PARAMS.DOUBLE = False
 PIE_PARAMS.TUF = 4
 PIE_PARAMS.DEV = 'cpu'
@@ -74,7 +84,7 @@ TRAIN_PARAMS.EPOCHS = 50000
 TRAIN_PARAMS.MOVES = 1
 TRAIN_PARAMS.EPISODIC = False
 TRAIN_PARAMS.MIN_MEM = 1
-TRAIN_PARAMS.LEARN_STEPS = 1
+TRAIN_PARAMS.LEARN_STEPS = 64
 TRAIN_PARAMS.BATCH_SIZE = 50
 TRAIN_PARAMS.TEST_FREQ = 10
 
@@ -107,29 +117,35 @@ env = gym.make(ENV_NAME)
 # Test ENV
 venv = gym.make(ENV_NAME)
 
+
+# SET ENV SEEDS
+# env.seed(0)
+# venv.seed(0)
+
 # Policy and Exploration
 # exp = EXP(env=env, cap=EXP_PARAMS.MEM_CAP, epsilonT=EXP_PARAMS.EPST)
 
 # txp = EXP(env=venv, cap=math.inf, epsilonT=(0, 0, 0))
 
 
-def decayF(epsilon, moves, isdone):
-    global eps
-    new_epsilon = epsilon*EXP_PARAMS.DECAY_MUL + \
-        EXP_PARAMS.DECAY_ADD  # random.random()
-    eps.append(new_epsilon)
-    return new_epsilon
+# def decayF(epsilon, moves, isdone):
+#     global eps
+#     new_epsilon = epsilon*EXP_PARAMS.DECAY_MUL + \
+#         EXP_PARAMS.DECAY_ADD  # random.random()
+#     eps.append(new_epsilon)
+#     return new_epsilon
 
 
-pie = A2C(
+pie = PPO(
+    env,
     env.observation_space.shape[0],
     PIE_PARAMS.LAYERS,
     env.action_space.n,
     device=PIE_PARAMS.DEV,
     # opt=PIE_PARAMS.OPTIM,
     # cost=PIE_PARAMS.LOSS,
-    # lr=PIE_PARAMS.LR,
-    # discount=PIE_PARAMS.DISCOUNT,
+    learning_rate=PIE_PARAMS.LR,
+    gamma=PIE_PARAMS.DISCOUNT,
     # mapper=lambda x: x,
     # double=PIE_PARAMS.DOUBLE,
     # tuf=PIE_PARAMS.TUF,
@@ -222,8 +238,6 @@ LOG_CSV = 'epoch,reward,tr,loss\n'
 current_observation = env.reset()
 
 
-# TODO FROM HERE
-
 lt1 = now()  # setting initial learning time
 for epoch in range(0, TRAIN_PARAMS.EPOCHS):
 
@@ -246,7 +260,7 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
 
     #     for _ in range(TRAIN_PARAMS.LEARN_STEPS):
     # Single Learning Step
-    current_observation, loss = pie.learn(env, current_observation)
+    loss = pie.learn(TRAIN_PARAMS.MOVES)
 
     sleep(0.01)
     # Send Parameters to Server
@@ -288,7 +302,8 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
     # P("after explore epoch#:",epoch)
 
     if epoch == 0 or (epoch+1) % TRAIN_PARAMS.TEST_FREQ == 0:
-        res = np.array([test_model(venv, pie) for _ in range(1)]).mean()
+        res = np.array([test_model(venv, pie, random.randint(0, 1000000))
+                       for _ in range(1)]).mean()
         trew = res
         ref.append([trew])
         # print('before queue')

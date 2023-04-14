@@ -22,10 +22,11 @@ def RMSprop_update(params,
     return params
 
 
-def test_model(env, model):
+def test_model(env, model, seed):
     '''
     Test a model for the total rewards it can collect
     '''
+    # env.seed(seed)
     observation = env.reset()
     done = False
     total_reward = 0.0
