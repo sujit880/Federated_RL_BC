@@ -26,7 +26,7 @@ now = datetime.datetime.now
 ##############################################
 # SETUP Hyperparameters
 ##############################################
-ALIAS = 'ppo6'
+ALIAS = 'ppo711'
 ENV_NAME = 'CartPole-v0'
 
 
@@ -81,7 +81,7 @@ PIE_PARAMS.DEV = 'cpu'
 
 TRAIN_PARAMS = INFRA()
 TRAIN_PARAMS.EPOCHS = 50000
-TRAIN_PARAMS.MOVES = 1
+TRAIN_PARAMS.MOVES = 10
 TRAIN_PARAMS.EPISODIC = False
 TRAIN_PARAMS.MIN_MEM = 1
 TRAIN_PARAMS.LEARN_STEPS = 64
@@ -314,7 +314,8 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
         P('[#]'+str(epoch+1), '\t',
             '[REW]'+str(trew),
             '[TR]'+str(pie.train_count),
-            '[CR]', np.mean(max_reward1.queue))
+            '[CR]', np.mean(max_reward1.queue),
+            '[LS]', str(loss))
         LOG_CSV += f'{str(epoch+1)},{str(trew)},{str(pie.train_count)},{str(loss)}\n'
         REW.append(["Rew: ", trew, "Train_count: ", pie.train_count])
         if (max_reward1.full()):

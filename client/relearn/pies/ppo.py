@@ -202,8 +202,15 @@ class PPO:
         '''
         # with self.actor_net.eval():
         # also can be torch.argmax, for maximum probability
-        action = self.actor_net(torch.from_numpy(observation))
-        return torch.argmax(action).detach().item()
+        mean = self.actor_net(torch.from_numpy(observation))
+
+        dist = Categorical(mean)
+
+        # Sample an action from the distribution
+        action = dist.sample()
+
+        # Return the sampled action
+        return action.item()
 
     def learn(self, batch_size: int):
         """
@@ -219,6 +226,8 @@ class PPO:
         # Autobots, roll out (just kidding, we're collecting our batch simulations here)
         batch_obs, batch_acts, batch_log_probs, batch_rtgs = self.memory.rollout(
             batch_size)                     # ALG STEP 3
+
+        # print('LEARN', batch_acts)
 
         # # Calculate how many timesteps we collected this batch
         # t_so_far += np.sum(batch_lens)
@@ -242,6 +251,7 @@ class PPO:
         # our advantages and makes convergence much more stable and faster. I added this because
         # solving some environments was too unstable without it.
         # A_k = torch.nn.functional.normalize(A_k)
+        A_k = (A_k - A_k.mean()) / (A_k.std() + 1e-10)
 
         # print('NORMALIZE', A_k1, A_k)
 
@@ -314,7 +324,7 @@ class PPO:
         # Calculate the log probabilities of batch actions using most recent actor network.
         # This segment of code is similar to that in get_action()
 
-        # print(batch_obs)
+        # print('BATCH EVAL ACTS', batch_acts)
 
         mean = self.actor_net(batch_obs)
         # print('MEAN', mean)
@@ -425,7 +435,7 @@ class RolloutMemory:
 
         # Reshape data as tensors in the shape specified in function description, before returning
         batch_obs = torch.tensor(batch_obs, dtype=torch.float)
-        batch_acts = torch.tensor(batch_acts, dtype=torch.float)
+        batch_acts = torch.tensor(batch_acts, dtype=torch.int)
         batch_log_probs = torch.tensor(batch_log_probs, dtype=torch.float)
         # ALG STEP 4
         batch_rtgs = self.compute_rtgs(batch_rews)
