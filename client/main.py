@@ -26,7 +26,7 @@ now = datetime.datetime.now
 ##############################################
 # SETUP Hyperparameters
 ##############################################
-ALIAS = 'ppo711'
+ALIAS = 'ppox3'
 ENV_NAME = 'CartPole-v0'
 
 
@@ -260,7 +260,7 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
 
     #     for _ in range(TRAIN_PARAMS.LEARN_STEPS):
     # Single Learning Step
-    loss = pie.learn(TRAIN_PARAMS.MOVES)
+    current_observation, loss = pie.learn(current_observation)
 
     sleep(0.01)
     # Send Parameters to Server
