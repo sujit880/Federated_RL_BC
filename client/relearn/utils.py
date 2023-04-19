@@ -22,7 +22,7 @@ def RMSprop_update(params,
     return params
 
 
-def test_model(env, model, seed):
+def test_model(env, model):
     '''
     Test a model for the total rewards it can collect
     '''

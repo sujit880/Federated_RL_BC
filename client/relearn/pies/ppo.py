@@ -83,7 +83,7 @@ class PPO:
             This is the PPO class we will use as our model in main.py
     """
 
-    def __init__(self, env, state_dim, layer_list, action_dim, optimizer=torch.optim.Adam, loss_fn=torch.nn.MSELoss, eps_clip=0.2, k_epochs=100, update_timestep=10, learning_rate=0.001,  gamma=0.99,  device='cpu'):
+    def __init__(self, env, state_dim, layer_list, action_dim, optimizer=torch.optim.Adam, loss_fn=torch.nn.MSELoss, eps_clip=0.2, k_epochs=10, update_timestep=10, learning_rate=0.001,  gamma=0.99,  device='cpu'):
         """
                 Initializes the PPO model, including hyperparameters.
 
@@ -118,9 +118,11 @@ class PPO:
             state_dim, layer_list, action_dim).to(self.device)
 
         self.optimizer = torch.optim.Adam([
-            {'params': self.policy.actor.parameters(), 'lr': 0.0003},
-            {'params': self.policy.critic.parameters(), 'lr': 0.001}
+            {'params': self.policy.actor.parameters(), 'lr': 0.0001},
+            {'params': self.policy.critic.parameters(), 'lr': 0.0001}
         ])
+
+        self.learn_rew = 0
 
         self.policy_old = ActorCritic(
             state_dim, layer_list, action_dim).to(self.device)
@@ -144,7 +146,7 @@ class PPO:
         observation = torch.from_numpy(observation)
 
         with torch.no_grad():
-            action, action_log_prob, state_val = self.policy_old.act(
+            action, action_log_prob, state_val = self.policy.act(
                 observation)
 
         if not test:
@@ -176,11 +178,14 @@ class PPO:
         action = self._select_action(observation)
         observation, reward, done, _ = self.env.step(action)
 
+        # print('LEARN STEP DONE', done)
+
         # saving reward and is_terminals
         self.buffer.rewards.append(reward)
         self.buffer.is_terminals.append(done)
 
         self.train_count += 1
+        self.learn_rew += reward
 
         loss = 999
 
@@ -189,6 +194,8 @@ class PPO:
             loss = self._update()
 
         if done:
+            # print('TR REW', self.learn_rew, done)
+            self.learn_rew = 0
             observation = self.env.reset()
 
         return observation, loss
@@ -259,7 +266,7 @@ class PPO:
             self.optimizer.step()
 
         # Copy new weights into old policy
-        self.policy_old.load_state_dict(self.policy.state_dict())
+        # self.policy_old.load_state_dict(self.policy.state_dict())
 
         # clear buffer
         self.buffer.clear()

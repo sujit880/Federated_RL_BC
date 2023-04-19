@@ -6,7 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torch
 
-from relearn.pies.ppo import PPO
+# from relearn.pies.ppo import PPO
+from sb_wrapper.ppo import PPO
 from relearn.utils import test_model
 
 import modman
@@ -26,7 +27,7 @@ now = datetime.datetime.now
 ##############################################
 # SETUP Hyperparameters
 ##############################################
-ALIAS = 'ppox3'
+ALIAS = 'ppo_sb__100_3_1'
 ENV_NAME = 'CartPole-v0'
 
 
@@ -70,7 +71,7 @@ class INFRA:
 
 
 PIE_PARAMS = INFRA()
-PIE_PARAMS.LAYERS = [28, 28, 28]
+PIE_PARAMS.LAYERS = [64, 64, 64]
 PIE_PARAMS.OPTIM = torch.optim.Adam  # 1. RMSprop, 2. Adam, 3. SGD
 PIE_PARAMS.LOSS = torch.nn.MSELoss
 PIE_PARAMS.LR = 0.001
@@ -81,11 +82,11 @@ PIE_PARAMS.DEV = 'cpu'
 
 TRAIN_PARAMS = INFRA()
 TRAIN_PARAMS.EPOCHS = 50000
-TRAIN_PARAMS.MOVES = 10
+TRAIN_PARAMS.MOVES = 1
 TRAIN_PARAMS.EPISODIC = False
 TRAIN_PARAMS.MIN_MEM = 1
 TRAIN_PARAMS.LEARN_STEPS = 64
-TRAIN_PARAMS.BATCH_SIZE = 50
+TRAIN_PARAMS.BATCH_SIZE = 100
 TRAIN_PARAMS.TEST_FREQ = 10
 
 TEST_PARAMS = INFRA()
@@ -136,21 +137,23 @@ venv = gym.make(ENV_NAME)
 #     return new_epsilon
 
 
-pie = PPO(
-    env,
-    env.observation_space.shape[0],
-    PIE_PARAMS.LAYERS,
-    env.action_space.n,
-    device=PIE_PARAMS.DEV,
-    # opt=PIE_PARAMS.OPTIM,
-    # cost=PIE_PARAMS.LOSS,
-    learning_rate=PIE_PARAMS.LR,
-    gamma=PIE_PARAMS.DISCOUNT,
-    # mapper=lambda x: x,
-    # double=PIE_PARAMS.DOUBLE,
-    # tuf=PIE_PARAMS.TUF,
-    # seed=None
-)
+# pie = PPO(
+#     env,
+#     env.observation_space.shape[0],
+#     PIE_PARAMS.LAYERS,
+#     env.action_space.n,
+#     device=PIE_PARAMS.DEV,
+#     # opt=PIE_PARAMS.OPTIM,
+#     # cost=PIE_PARAMS.LOSS,
+#     learning_rate=PIE_PARAMS.LR,
+#     gamma=PIE_PARAMS.DISCOUNT,
+#     # mapper=lambda x: x,
+#     # double=PIE_PARAMS.DOUBLE,
+#     # tuf=PIE_PARAMS.TUF,
+#     # seed=None
+# )
+
+pie = PPO(env)
 
 
 log_data = []
@@ -239,7 +242,7 @@ current_observation = env.reset()
 
 
 lt1 = now()  # setting initial learning time
-for epoch in range(0, TRAIN_PARAMS.EPOCHS):
+for epoch in range(0, TRAIN_PARAMS.EPOCHS, TRAIN_PARAMS.MOVES):
 
     loss = None
     if ((epoch+1) % 1_000 == 0):
@@ -260,7 +263,7 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
 
     #     for _ in range(TRAIN_PARAMS.LEARN_STEPS):
     # Single Learning Step
-    current_observation, loss = pie.learn(current_observation)
+    pie.learn(total_timesteps=TRAIN_PARAMS.MOVES)
 
     sleep(0.01)
     # Send Parameters to Server
@@ -302,7 +305,7 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
     # P("after explore epoch#:",epoch)
 
     if epoch == 0 or (epoch+1) % TRAIN_PARAMS.TEST_FREQ == 0:
-        res = np.array([test_model(venv, pie, random.randint(0, 1000000))
+        res = np.array([test_model(venv, pie)
                        for _ in range(1)]).mean()
         trew = res
         ref.append([trew])
