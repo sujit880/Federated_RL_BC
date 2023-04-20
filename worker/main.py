@@ -7,7 +7,7 @@ import torch
 from time import sleep
 
 # Model Name / ALIAS (in Client)
-ALIAS = 'experiment_01'
+ALIAS = '5client'
 
 # API endpoint
 URL = "http://localhost:3000/api/model/"
