@@ -5,7 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torch
 
-from relearn.pies.a2c import A2C
+# from relearn.pies.a2c import A2C
+from sb_wrapper.a2c import A2C
 from relearn.utils import test_model
 
 import modman
@@ -25,7 +26,7 @@ now = datetime.datetime.now
 ##############################################
 # SETUP Hyperparameters
 ##############################################
-ALIAS = '5client'
+ALIAS = 'sbac1_3'
 ENV_NAME = 'CartPole-v0'
 
 # For test locally -> ..
@@ -122,10 +123,11 @@ def decayF(epsilon, moves, isdone):
 
 
 pie = A2C(
-    env.observation_space.shape[0],
-    PIE_PARAMS.LAYERS,
-    env.action_space.n,
-    device=PIE_PARAMS.DEV,
+    env
+    # env.observation_space.shape[0],
+    # PIE_PARAMS.LAYERS,
+    # env.action_space.n,
+    # device=PIE_PARAMS.DEV,
     # opt=PIE_PARAMS.OPTIM,
     # cost=PIE_PARAMS.LOSS,
     # lr=PIE_PARAMS.LR,
@@ -219,7 +221,7 @@ P('after max_reward queue')
 
 LOG_CSV = 'epoch,reward,tr,loss\n'
 
-current_observation = env.reset()
+# current_observation = env.reset()
 
 
 # TODO FROM HERE
@@ -246,7 +248,8 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
 
     #     for _ in range(TRAIN_PARAMS.LEARN_STEPS):
     # Single Learning Step
-    current_observation, loss = pie.learn(env, current_observation)
+    # current_observation, loss = pie.learn(env, current_observation)
+    pie.learn(total_timesteps=1)
 
     sleep(0.01)
     # Send Parameters to Server
