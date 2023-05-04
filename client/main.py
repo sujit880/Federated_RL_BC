@@ -25,7 +25,7 @@ now = datetime.datetime.now
 ##############################################
 # SETUP Hyperparameters
 ##############################################
-ALIAS = '5client'
+ALIAS = '1client_a2c'
 ENV_NAME = 'CartPole-v0'
 
 # For test locally -> ..
@@ -113,12 +113,12 @@ venv = gym.make(ENV_NAME)
 # txp = EXP(env=venv, cap=math.inf, epsilonT=(0, 0, 0))
 
 
-def decayF(epsilon, moves, isdone):
-    global eps
-    new_epsilon = epsilon*EXP_PARAMS.DECAY_MUL + \
-        EXP_PARAMS.DECAY_ADD  # random.random()
-    eps.append(new_epsilon)
-    return new_epsilon
+# def decayF(epsilon, moves, isdone):
+#     global eps
+#     new_epsilon = epsilon*EXP_PARAMS.DECAY_MUL + \
+#         EXP_PARAMS.DECAY_ADD  # random.random()
+#     eps.append(new_epsilon)
+#     return new_epsilon
 
 
 pie = A2C(
@@ -246,7 +246,8 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
 
     #     for _ in range(TRAIN_PARAMS.LEARN_STEPS):
     # Single Learning Step
-    current_observation, loss = pie.learn(env, current_observation)
+    for _ in range(TRAIN_PARAMS.LEARN_STEPS):
+        current_observation, loss = pie.learn(env, current_observation)
 
     sleep(0.01)
     # Send Parameters to Server
@@ -303,15 +304,18 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
         LOG_CSV += f'{str(epoch+1)},{str(trew)},{str(pie.train_count)},{str(loss)}\n'
         REW.append(["Rew: ", trew, "Train_count: ", pie.train_count])
         if (max_reward1.full()):
-            if (np.mean(max_reward1.queue) >= 200):
+            if (np.mean(max_reward1.queue) >= 195):
                 break
     etft = now()  # End time for testing
     tft.append(etft-stft)
+    # if epoch == 50: break
 
 log_dir = './logs/'
 if not os.path.exists(log_dir):
+    print(f'Path not found')
     os.makedirs(log_dir)
-sav_instance_path = f'{log_dir+str(getpid())+":END"+ENV_NAME}_{ALIAS}_EPC-{pie.train_count}_{MODEL_HYPARAMS}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}_FINISHED'
+sav_instance_path = f'{log_dir+str(getpid())+"_END"+ENV_NAME}_{ALIAS}_{stamp.strftime("%d_%m_%Y-%H_%M_%S")}_FINISHED'
+print(f'Path: {sav_instance_path}')
 with open(sav_instance_path + '.csv', 'w') as f:
     f.write(LOG_CSV)
 
