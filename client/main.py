@@ -61,10 +61,10 @@ class INFRA:
 
 
 PIE_PARAMS = INFRA()
-PIE_PARAMS.LAYERS = [28, 28, 28]
+PIE_PARAMS.LAYERS = [128, 128, 128]
 PIE_PARAMS.OPTIM = torch.optim.Adam  # 1. RMSprop, 2. Adam, 3. SGD
 PIE_PARAMS.LOSS = torch.nn.MSELoss
-PIE_PARAMS.LR = 0.0001
+PIE_PARAMS.LR = 0.001
 PIE_PARAMS.DISCOUNT = 0.999999
 PIE_PARAMS.DOUBLE = False
 PIE_PARAMS.TUF = 4
@@ -114,12 +114,12 @@ venv = gym.make(ENV_NAME)
 # txp = EXP(env=venv, cap=math.inf, epsilonT=(0, 0, 0))
 
 
-def decayF(epsilon, moves, isdone):
-    global eps
-    new_epsilon = epsilon*EXP_PARAMS.DECAY_MUL + \
-        EXP_PARAMS.DECAY_ADD  # random.random()
-    eps.append(new_epsilon)
-    return new_epsilon
+# def decayF(epsilon, moves, isdone):
+#     global eps
+#     new_epsilon = epsilon*EXP_PARAMS.DECAY_MUL + \
+#         EXP_PARAMS.DECAY_ADD  # random.random()
+#     eps.append(new_epsilon)
+#     return new_epsilon
 
 
 pie = A2C(
@@ -131,7 +131,7 @@ pie = A2C(
     # opt=PIE_PARAMS.OPTIM,
     # cost=PIE_PARAMS.LOSS,
     # lr=PIE_PARAMS.LR,
-    # discount=PIE_PARAMS.DISCOUNT,
+    # discount=PIE_PARAMS.DISCOUNT
     # mapper=lambda x: x,
     # double=PIE_PARAMS.DOUBLE,
     # tuf=PIE_PARAMS.TUF,
