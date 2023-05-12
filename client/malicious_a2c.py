@@ -9,7 +9,7 @@ from relearn.pies.a2c import A2C
 from relearn.utils import test_model
 
 import modman
-
+import random
 from queue import Queue
 import gym
 import os
@@ -63,7 +63,7 @@ PIE_PARAMS = INFRA()
 PIE_PARAMS.LAYERS = [28, 28, 28]
 PIE_PARAMS.OPTIM = torch.optim.Adam  # 1. RMSprop, 2. Adam, 3. SGD
 PIE_PARAMS.LOSS = torch.nn.MSELoss
-PIE_PARAMS.LR = 0.001
+PIE_PARAMS.LR = 0.0001
 PIE_PARAMS.DISCOUNT = 0.999999
 PIE_PARAMS.DOUBLE = False
 PIE_PARAMS.TUF = 4
@@ -120,6 +120,12 @@ def decayF(epsilon, moves, isdone):
     eps.append(new_epsilon)
     return new_epsilon
 
+def get_mal_params(pie):
+    params=pie.state_dict()
+    mal_params = {}
+    for key in params.keys():
+        mal_params[key] = torch.rand(params[key].shape)
+    return mal_params
 
 pie = A2C(
     env.observation_space.shape[0],
@@ -217,13 +223,13 @@ P('after max_reward queue')
 # exp.reset(clear_mem=True, reset_epsilon=True)
 # txp.reset(clear_mem=True, reset_epsilon=True)
 
-LOG_CSV = 'epoch,reward,tr,loss,total_time\n'
+LOG_CSV = 'epoch,reward,tr,loss\n'
 
 current_observation = env.reset()
 
 
 # TODO FROM HERE
-intial_ts = now()
+
 lt1 = now()  # setting initial learning time
 for epoch in range(0, TRAIN_PARAMS.EPOCHS):
 
@@ -232,7 +238,7 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
         log_dir = './logs/'
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
-        sav_instance_path = f'{log_dir+str(getpid())+"_"+ENV_NAME}_{stpc.strftime("%d_%m_%Y-%H_%M_%S")}'
+        sav_instance_path = f'{log_dir+str(getpid())+":"+ENV_NAME}_{stpc.strftime("%d_%m_%Y-%H_%M_%S")}'
         with open(sav_instance_path + '.csv', 'w') as f:
             f.write(LOG_CSV)
 
@@ -244,6 +250,8 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
 
     # if exp.memory.count >= TRAIN_PARAMS.MIN_MEM:
 
+    #     for _ in range(TRAIN_PARAMS.LEARN_STEPS):
+    # Single Learning Step
     for _ in range(TRAIN_PARAMS.LEARN_STEPS):
         current_observation, loss = pie.learn(env, current_observation)
 
@@ -257,19 +265,24 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
         t1 = now()  # time stamp at the start time for communication
 
         # Sending Locally Trained Params
-        print("Sending Local Params")
-        reply = modman.send_local_update(URL,
-                                         modman.convert_tensor_to_list(
-                                             pie.state_dict()),
-                                         epoch, ALIAS)
-        print(reply, "\n Local update sent")
-        log_data.append(reply)
-
+        P(f'Sending Locally Trained Params round: {round}')
+        rand=random.random()
+        if epoch <0:                    
+            P("Sending malicious update")
+            mal_params = get_mal_params(pie)
+            reply = modman.send_local_update(URL,
+            modman.convert_tensor_to_list(mal_params),
+                    epoch, ALIAS)
+        else:                    
+            reply = modman.send_local_update(URL,
+            modman.convert_tensor_to_list(pie.state_dict()),
+                    epoch, ALIAS)
+        sleep(30)
         # Wait for Model Lock to get Released
         while modman.get_model_lock(URL, ALIAS):
             print("Waiting for Model Lock Release2.")
             sleep(0.05)
-
+        
         # Get Updated Model Params from Server
         global_params, n_push, _, is_available = modman.fetch_params(
             URL, ALIAS)
@@ -277,7 +290,7 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
         # print("Params->", global_params)
         pie.load_state_dict(
             modman.convert_list_to_tensor(global_params))
-    
+
         t2 = now()  # time stamp at the end time of communication
         print("Communication delay: ", t2-t1)
         c_d1.append(t2-t1)
@@ -299,11 +312,10 @@ for epoch in range(0, TRAIN_PARAMS.EPOCHS):
             '[REW]'+str(trew),
             '[TR]'+str(pie.train_count),
             '[CR]', np.mean(max_reward1.queue))
-        diff = now() - intial_ts
-        LOG_CSV += f'{str(epoch+1)},{str(trew)},{str(pie.train_count)},{str(loss)},{str(diff.total_seconds())}\n'
+        LOG_CSV += f'{str(epoch+1)},{str(trew)},{str(pie.train_count)},{str(loss)}\n'
         REW.append(["Rew: ", trew, "Train_count: ", pie.train_count])
         if (max_reward1.full()):
-            if (np.mean(max_reward1.queue) >= 195):
+            if (np.mean(max_reward1.queue) >= 200):
                 break
     etft = now()  # End time for testing
     tft.append(etft-stft)
